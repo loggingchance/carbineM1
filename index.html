@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARBINE</title>
+  </head>
+  <body>
+    <script>
+      window.addEventListener("error", (event) => {
+        const root = document.getElementById("root");
+        if (!root) return;
+        root.innerHTML = `<div style="font: 16px system-ui; padding: 24px; color: #111;">
+          <h1 style="font-size: 24px;">CARBINE did not finish loading</h1>
+          <p>${event.message || "Browser script error"}</p>
+          <pre style="white-space: pre-wrap; background: #f5eeee; padding: 12px;">${event.filename || ""}:${event.lineno || ""}:${event.colno || ""}</pre>
+        </div>`;
+      });
+      window.addEventListener("unhandledrejection", (event) => {
+        const root = document.getElementById("root");
+        if (!root) return;
+        const reason = event.reason?.stack || event.reason?.message || String(event.reason);
+        root.innerHTML = `<div style="font: 16px system-ui; padding: 24px; color: #111;">
+          <h1 style="font-size: 24px;">CARBINE did not finish loading</h1>
+          <pre style="white-space: pre-wrap; background: #f5eeee; padding: 12px;">${reason}</pre>
+        </div>`;
+      });
+    </script>
+    <div id="root">
+      <div style="font: 18px system-ui; padding: 24px; color: #111;">Loading CARBINE...</div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

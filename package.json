@@ -1,0 +1,35 @@
+{
+  "name": "carbine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build && vite preview --host 127.0.0.1",
+    "dev:live": "vite --config carbine.vite.mjs --configLoader native",
+    "build": "tsc -b && vite build --config carbine.vite.mjs --configLoader native",
+    "preview": "vite preview --host 127.0.0.1",
+    "doctor": "node scripts/carbine-doctor.mjs",
+    "fvs:bridge": "node scripts/local-fvs-bridge.mjs",
+    "fvs:api": "node scripts/local-fvs-bridge.mjs",
+    "hosted:health": "node scripts/check-hosted-fvs-api.mjs",
+    "fvs:source:status": "node scripts/fvs-source-status.mjs",
+    "fvs:variants": "node scripts/list-fvs-variants.mjs",
+    "fvs:build:all": "node scripts/build-fvs-all-native.mjs",
+    "fvs:build:ne": "node scripts/build-fvs-ne-native.mjs",
+    "smoke:official": "vitest run src/smoke/officialFvsSmoke.test.ts",
+    "test": "vitest run src/tests"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7",
+    "typescript": "^5.7.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2"
+  }
+}

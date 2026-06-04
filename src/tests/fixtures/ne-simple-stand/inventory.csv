@@ -1,0 +1,2 @@
+stand_id,plot_id,tree_id,species_code,dbh_in,height_ft,trees_per_acre,status,crown_ratio,tree_class,notes
+Stand_001,P1,T0001,SM,14.2,72,3.5,live,35,AGS,Sample sugar maple

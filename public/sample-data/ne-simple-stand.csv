@@ -1,0 +1,6 @@
+stand_id,plot_id,tree_id,species_code,dbh_in,height_ft,trees_per_acre,status,crown_ratio,tree_class,notes
+Stand_001,P1,T0001,SM,14.2,72,3.5,live,35,AGS,Sample sugar maple
+Stand_001,P1,T0002,RM,10.8,61,4.0,live,40,AGS,Sample red maple
+Stand_001,P2,T0003,EH,16.4,78,2.2,live,32,AGS,Sample eastern hemlock
+Stand_001,P2,T0004,AB,8.7,48,5.1,live,44,AGS,Sample balsam fir
+Stand_001,P3,T0005,RO,20.1,86,1.4,live,30,AGS,Sample red oak

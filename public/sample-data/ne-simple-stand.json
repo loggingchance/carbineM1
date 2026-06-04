@@ -1,0 +1,11 @@
+{
+  "projectName": "CARBINE sample project",
+  "standName": "NE simple stand",
+  "state": "VT",
+  "county": "Windsor",
+  "areaAcres": 42,
+  "inventoryYear": 2026,
+  "projectionYears": 50,
+  "fvsVariant": "NE",
+  "units": "english"
+}

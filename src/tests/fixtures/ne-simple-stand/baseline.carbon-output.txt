@@ -1,0 +1,3 @@
+year,live_tree_carbon_tons,selected_pool_total_carbon_tons
+2026,10,14
+2036,12,17
