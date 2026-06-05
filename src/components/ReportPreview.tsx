@@ -19,7 +19,7 @@ export function ReportPreview({
   const html = results ? buildHtmlReport(request, results) : "";
   const hasCarbonRows = results?.series.some((series) => series.points.some((point) => point.selectedPoolTotalCarbonTons !== undefined)) ?? false;
   const runtimeLabel = results ? (results.isRealFvs ? "Real FVS output" : "Demo output") : "No run yet";
-  const diagnosticsPreview = generatedPreview || "Run scenarios to preview generated inventory, keyword files, and raw local FVS output.";
+  const diagnosticsPreview = generatedPreview || "Run scenarios to preview generated inventory, keyword files, and raw FVS output.";
 
   function download(name: string, body: string, type: string) {
     const url = URL.createObjectURL(new Blob([body], { type }));
@@ -64,7 +64,7 @@ export function ReportPreview({
           >
             <FileJson size={18} /> Diagnostics
           </button>
-          <button type="button" className="secondary" disabled={!results} onClick={() => download("carbine-tester-summary.txt", buildTesterSummary(request, results), "text/plain")}>
+          <button type="button" className="secondary" disabled={!results} onClick={() => download("carbine-run-summary.txt", buildTesterSummary(request, results), "text/plain")}>
             <ScrollText size={18} /> Summary
           </button>
           <button type="button" className="secondary" disabled={!results} onClick={() => results && download("carbine-results.csv", resultsToCsv(results), "text/csv")}>
@@ -89,9 +89,9 @@ export function ReportPreview({
         <span>
           {results
             ? hasCarbonRows
-              ? "Carbon rows are included. Send Diagnostics and Summary with tester feedback."
-              : "No parsed carbon rows were found. Send Diagnostics and Summary so raw FVS output can be reviewed."
-            : "Run scenarios before exporting tester evidence."}
+              ? "Carbon rows are included. Export Diagnostics or Summary when you need to preserve the run details."
+              : "No parsed carbon rows were found. Export Diagnostics so raw FVS output can be reviewed."
+            : "Run scenarios before exporting results."}
         </span>
       </div>
       {results ? (

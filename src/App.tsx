@@ -8,7 +8,6 @@ import { RunPanel } from "./components/RunPanel";
 import { ResultsDashboard } from "./components/ResultsDashboard";
 import { ReportPreview } from "./components/ReportPreview";
 import { AdvancedFvsPanel } from "./components/AdvancedFvsPanel";
-import { TesterChecklist } from "./components/TesterChecklist";
 import { AboutCarbine } from "./components/AboutCarbine";
 import { Disclaimer } from "./components/Disclaimer";
 import type { TreeRecord } from "./domain/inventorySchema";
@@ -27,7 +26,7 @@ import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
 import { hasHostedFvsApi, hostedFvsApiUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 
-const steps: WorkflowStep[] = ["Tester", "Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
+const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
 
 const initialProject: StandProject = {
   projectName: "CARBINE sample project",
@@ -55,7 +54,7 @@ interface StoredDraft {
 export function App() {
   const storedDraft = loadStoredDraft();
   const draftProject = storedDraft?.project ?? initialProject;
-  const [activeStep, setActiveStep] = useState<WorkflowStep>("Tester");
+  const [activeStep, setActiveStep] = useState<WorkflowStep>("Inventory");
   const [project, setProject] = useState<StandProject>(draftProject);
   const [inventory, setInventory] = useState<TreeRecord[]>(storedDraft?.inventory ?? []);
   const [scenarios, setScenarios] = useState<ScenarioDefinition[]>(
@@ -67,7 +66,7 @@ export function App() {
   const [results, setResults] = useState<CarbineScenarioResults | undefined>(storedDraft?.results);
   const [generatedPreview, setGeneratedPreview] = useState(storedDraft?.generatedPreview ?? "");
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>(
-    runtimeModeFromStored(storedDraft?.runtimeMode) ?? (hasHostedFvsApi ? "hosted" : "official")
+    hasHostedFvsApi ? "hosted" : runtimeModeFromStored(storedDraft?.runtimeMode) ?? "official"
   );
 
   const demoAdapter = useMemo(() => new FvsMockAdapter(), []);
@@ -136,20 +135,9 @@ export function App() {
 
   return (
     <div className="app">
-      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : "Demo data"} />
+      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : hasHostedFvsApi ? "Hosted FVS API" : "Demo data"} />
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
       <main className="workspace">
-        {activeStep === "Tester" && (
-          <TesterChecklist
-            request={request}
-            results={results}
-            onGoToInventory={() => setActiveStep("Inventory")}
-            onGoToScenario={() => setActiveStep("Scenario")}
-            onGoToRun={() => setActiveStep("Run")}
-            onGoToAdvanced={() => setActiveStep("Advanced")}
-            runtimeMode={runtimeMode}
-          />
-        )}
         {activeStep === "Inventory" && (
           <InventoryUpload project={project} inventory={inventory} onProjectChange={setProject} onInventoryChange={setInventory} />
         )}

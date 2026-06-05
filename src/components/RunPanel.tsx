@@ -91,23 +91,20 @@ export function RunPanel({
     <section className="panel run-panel">
       <p className="eyebrow">Run</p>
       <h2>Run the scenario set</h2>
-      <p className="quiet">
-        Choose Hosted FVS API for the tester web-app path. Local bridge is only for developer verification on this computer.
-      </p>
-      <div className="segmented" aria-label="Runtime mode">
-        <button type="button" className={runtimeMode === "hosted" ? "active" : ""} onClick={() => onRuntimeModeChange("hosted")}>
-          Hosted FVS API
-        </button>
-        <button type="button" className={runtimeMode === "official" ? "active" : ""} onClick={() => onRuntimeModeChange("official")}>
-          Local bridge
-        </button>
-        <button type="button" className={runtimeMode === "demo" ? "active" : ""} onClick={() => onRuntimeModeChange("demo")}>
-          Demo
-        </button>
-      </div>
+      <p className="quiet">Run the loaded inventory and scenario set through the configured FVS runtime.</p>
+      {!hasHostedFvsApi && (
+        <div className="segmented" aria-label="Runtime mode">
+          <button type="button" className={runtimeMode === "official" ? "active" : ""} onClick={() => onRuntimeModeChange("official")}>
+            Local bridge
+          </button>
+          <button type="button" className={runtimeMode === "demo" ? "active" : ""} onClick={() => onRuntimeModeChange("demo")}>
+            Demo
+          </button>
+        </div>
+      )}
       {runtimeMode === "hosted" && !hasHostedFvsApi && (
         <p className="note">
-          Hosted mode is the right outside-tester path, but this local build has no hosted FVS API address configured yet.
+          Hosted FVS API is not configured for this build.
         </p>
       )}
       {runtimeMode === "official" && (

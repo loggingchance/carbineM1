@@ -1,4 +1,4 @@
-export type WorkflowStep = "Tester" | "Inventory" | "Scenario" | "Run" | "Results" | "Report" | "Advanced" | "About";
+export type WorkflowStep = "Inventory" | "Scenario" | "Run" | "Results" | "Report" | "Advanced" | "About";
 
 export function WorkflowShell({
   steps,

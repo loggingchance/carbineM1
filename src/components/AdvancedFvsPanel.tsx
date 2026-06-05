@@ -38,7 +38,7 @@ export function AdvancedFvsPanel({
         </button>
       </div>
       <p className="quiet">
-        Use Export diagnostics when sharing tester feedback. It includes the request, parsed results, generated FVS keyword files, tree file, run log, and raw FVS outputs.
+        Export diagnostics includes the request, parsed results, generated FVS keyword files, tree file, run log, and raw FVS outputs.
       </p>
       <dl className="details">
         <div><dt>Variant</dt><dd>{request.fvs.variant}</dd></div>
