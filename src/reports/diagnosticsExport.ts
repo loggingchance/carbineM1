@@ -4,8 +4,11 @@ import type { CarbineRunRequest } from "../domain/fvsRunRequest";
 export function buildDiagnosticsExport(
   request: CarbineRunRequest,
   results: CarbineScenarioResults | undefined,
-  generatedPreview: string
+  generatedPreview: string,
+  currentRequest?: CarbineRunRequest
 ): string {
+  const currentScenarioCount = currentRequest?.scenarios.length ?? request.scenarios.length;
+  const requestMatchesCurrent = !currentRequest || currentScenarioCount === request.scenarios.length;
   return JSON.stringify(
     {
       format: "carbine-diagnostics",
@@ -14,6 +17,8 @@ export function buildDiagnosticsExport(
       summary: {
         variant: request.fvs.variant,
         scenarioCount: request.scenarios.length,
+        currentScenarioCount,
+        requestMatchesCurrent,
         inventoryRecordCount: request.inventory.length,
         adapterName: results?.adapterName ?? null,
         isRealFvs: results?.isRealFvs ?? null,
@@ -22,6 +27,7 @@ export function buildDiagnosticsExport(
         treatmentEffects: results ? buildTreatmentEffectSummary(results) : []
       },
       request,
+      currentRequest: requestMatchesCurrent ? undefined : currentRequest,
       generatedPreview,
       results,
       runArtifacts: results?.runArtifacts ?? []

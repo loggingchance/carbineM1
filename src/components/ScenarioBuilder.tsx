@@ -168,6 +168,9 @@ export function ScenarioBuilder({
               Removal intensity
               <input
                 type="number"
+                min={1}
+                max={80}
+                step={1}
                 value={scenario.simpleControls?.percentBasalAreaRemoval ?? 0}
                 disabled={scenario.type === "baseline"}
                 onChange={(event) =>

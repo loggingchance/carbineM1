@@ -78,6 +78,7 @@ describe("buildDiagnosticsExport", () => {
 
     expect(exported.format).toBe("carbine-diagnostics");
     expect(exported.summary.variant).toBe("NE");
+    expect(exported.summary.requestMatchesCurrent).toBe(true);
     expect(exported.summary.runArtifactCount).toBe(1);
     expect(exported.summary.treatmentEffects[0].removedCarbonByYear[0].removedCarbonTons).toBe(1.2);
     expect(exported.summary.treatmentEffects[0].finalSelectedPoolDeltaVsBaselineTons).toBe(-1);
@@ -85,5 +86,28 @@ describe("buildDiagnosticsExport", () => {
     expect(exported.request.inventory[0].speciesCode).toBe("SM");
     expect(exported.runArtifacts[0].keywordFile).toContain("SCREEN");
     expect(exported.runArtifacts[0].rawOutputs["input.out"]).toContain("STAND CARBON REPORT");
+  });
+
+  it("keeps the last run request separate from a changed current setup", () => {
+    const currentRequest = {
+      ...request,
+      scenarios: [
+        ...request.scenarios,
+        {
+          ...lightThinScenario(2026),
+          id: "thin-extra",
+          treatmentYears: [2046],
+          simpleControls: { percentBasalAreaRemoval: 15, minDbhIn: 6 }
+        }
+      ]
+    };
+
+    const exported = JSON.parse(buildDiagnosticsExport(request, results, "friendly preview", currentRequest));
+
+    expect(exported.summary.scenarioCount).toBe(2);
+    expect(exported.summary.currentScenarioCount).toBe(3);
+    expect(exported.summary.requestMatchesCurrent).toBe(false);
+    expect(exported.currentRequest.scenarios).toHaveLength(3);
+    expect(exported.request.scenarios).toHaveLength(2);
   });
 });

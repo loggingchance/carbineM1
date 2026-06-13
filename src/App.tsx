@@ -48,6 +48,7 @@ interface StoredDraft {
   inventory: TreeRecord[];
   scenarios: ScenarioDefinition[];
   results?: CarbineScenarioResults;
+  lastRunRequest?: CarbineRunRequest;
   generatedPreview?: string;
   runtimeMode?: RuntimeMode;
 }
@@ -65,6 +66,7 @@ export function App() {
     ]
   );
   const [results, setResults] = useState<CarbineScenarioResults | undefined>(storedDraft?.results);
+  const [lastRunRequest, setLastRunRequest] = useState<CarbineRunRequest | undefined>(storedDraft?.lastRunRequest);
   const [generatedPreview, setGeneratedPreview] = useState(storedDraft?.generatedPreview ?? "");
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>(
     hasHostedFvsApi ? "hosted" : runtimeModeFromStored(storedDraft?.runtimeMode) ?? "official"
@@ -121,11 +123,12 @@ export function App() {
         inventory,
         scenarios: scenarios.map((scenario) => sanitizeScenario(project, scenario)),
         results,
+        lastRunRequest,
         generatedPreview,
         runtimeMode
       })
     );
-  }, [project, inventory, scenarios, results, generatedPreview, runtimeMode]);
+  }, [project, inventory, scenarios, results, lastRunRequest, generatedPreview, runtimeMode]);
 
   async function loadSampleInventory() {
     const csv = await fetch("./sample-data/ne-simple-stand.csv").then((response) => response.text());
@@ -159,6 +162,7 @@ export function App() {
             onLoadSampleInventory={loadSampleInventory}
             onResults={(nextResults, preview) => {
               setResults(nextResults);
+              setLastRunRequest(request);
               setGeneratedPreview(preview);
               setActiveStep("Results");
             }}
@@ -171,8 +175,22 @@ export function App() {
             onGoToAdvanced={() => setActiveStep("Advanced")}
           />
         )}
-        {activeStep === "Report" && <ReportPreview request={request} results={results} generatedPreview={generatedPreview} />}
-        {activeStep === "Advanced" && <AdvancedFvsPanel request={request} results={results} generatedPreview={generatedPreview} />}
+        {activeStep === "Report" && (
+          <ReportPreview
+            request={results && lastRunRequest ? lastRunRequest : request}
+            currentRequest={request}
+            results={results}
+            generatedPreview={generatedPreview}
+          />
+        )}
+        {activeStep === "Advanced" && (
+          <AdvancedFvsPanel
+            request={results && lastRunRequest ? lastRunRequest : request}
+            currentRequest={request}
+            results={results}
+            generatedPreview={generatedPreview}
+          />
+        )}
         {activeStep === "About" && <AboutCarbine />}
       </main>
       <Disclaimer />

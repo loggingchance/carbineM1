@@ -9,10 +9,12 @@ import { buildTesterSummary } from "../reports/testerSummary";
 
 export function ReportPreview({
   request,
+  currentRequest,
   results,
   generatedPreview
 }: {
   request: CarbineRunRequest;
+  currentRequest?: CarbineRunRequest;
   results?: CarbineScenarioResults;
   generatedPreview: string;
 }) {
@@ -20,6 +22,8 @@ export function ReportPreview({
   const hasCarbonRows = results?.series.some((series) => series.points.some((point) => point.selectedPoolTotalCarbonTons !== undefined)) ?? false;
   const runtimeLabel = results ? (results.isRealFvs ? "Real FVS output" : "Demo output") : "No run yet";
   const diagnosticsPreview = generatedPreview || "Run scenarios to preview generated inventory, keyword files, and raw FVS output.";
+  const currentScenarioCount = currentRequest?.scenarios.length ?? request.scenarios.length;
+  const showsRunSnapshot = Boolean(results && currentRequest && currentScenarioCount !== request.scenarios.length);
 
   function download(name: string, body: string, type: string) {
     const url = URL.createObjectURL(new Blob([body], { type }));
@@ -60,7 +64,7 @@ export function ReportPreview({
             type="button"
             className="primary"
             disabled={!results}
-            onClick={() => download("carbine-diagnostics.json", buildDiagnosticsExport(request, results, diagnosticsPreview), "application/json")}
+            onClick={() => download("carbine-diagnostics.json", buildDiagnosticsExport(request, results, diagnosticsPreview, currentRequest), "application/json")}
           >
             <FileJson size={18} /> Diagnostics
           </button>
@@ -87,7 +91,9 @@ export function ReportPreview({
       <div className="report-status">
         <strong className={results?.isRealFvs ? "real-badge" : "demo-badge"}>{runtimeLabel}</strong>
         <span>
-          {results
+          {showsRunSnapshot
+            ? `This report uses the last completed run with ${request.scenarios.length} scenarios. Current setup has ${currentScenarioCount}; run again before exporting new reviewer results.`
+            : results
             ? hasCarbonRows
               ? "Carbon rows are included. Export Diagnostics or Summary when you need to preserve the run details."
               : "No parsed carbon rows were found. Export Diagnostics so raw FVS output can be reviewed."
