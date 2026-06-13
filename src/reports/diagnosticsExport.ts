@@ -8,7 +8,15 @@ export function buildDiagnosticsExport(
   currentRequest?: CarbineRunRequest
 ): string {
   const currentScenarioCount = currentRequest?.scenarios.length ?? request.scenarios.length;
-  const requestMatchesCurrent = !currentRequest || currentScenarioCount === request.scenarios.length;
+  const requestMatchesCurrent = !currentRequest || requestsHaveSameScenarioSet(request, currentRequest);
+  const resultScenarioIds = new Set(results?.series.map((series) => series.scenarioId) ?? []);
+  const missingResultScenarioIds = request.scenarios
+    .map((scenario) => scenario.id)
+    .filter((scenarioId) => !resultScenarioIds.has(scenarioId));
+  const extraResultScenarioIds = [...resultScenarioIds].filter(
+    (scenarioId) => !request.scenarios.some((scenario) => scenario.id === scenarioId)
+  );
+  const resultsCoverRequest = missingResultScenarioIds.length === 0 && extraResultScenarioIds.length === 0;
   return JSON.stringify(
     {
       format: "carbine-diagnostics",
@@ -19,6 +27,9 @@ export function buildDiagnosticsExport(
         scenarioCount: request.scenarios.length,
         currentScenarioCount,
         requestMatchesCurrent,
+        resultsCoverRequest,
+        missingResultScenarioIds,
+        extraResultScenarioIds,
         inventoryRecordCount: request.inventory.length,
         adapterName: results?.adapterName ?? null,
         isRealFvs: results?.isRealFvs ?? null,
@@ -35,6 +46,23 @@ export function buildDiagnosticsExport(
     null,
     2
   );
+}
+
+function requestsHaveSameScenarioSet(a: CarbineRunRequest, b: CarbineRunRequest): boolean {
+  if (a.scenarios.length !== b.scenarios.length) return false;
+  return a.scenarios.every((scenario, index) => {
+    const other = b.scenarios[index];
+    return (
+      other !== undefined &&
+      scenario.id === other.id &&
+      scenario.name === other.name &&
+      scenario.type === other.type &&
+      JSON.stringify(scenario.treatmentYears) === JSON.stringify(other.treatmentYears) &&
+      scenario.simpleControls?.percentBasalAreaRemoval === other.simpleControls?.percentBasalAreaRemoval &&
+      scenario.simpleControls?.minDbhIn === other.simpleControls?.minDbhIn &&
+      scenario.simpleControls?.maxDbhIn === other.simpleControls?.maxDbhIn
+    );
+  });
 }
 
 function buildTreatmentEffectSummary(results: CarbineScenarioResults) {

@@ -47,7 +47,7 @@ const results: CarbineScenarioResults = {
       parserWarnings: []
     },
     {
-      scenarioId: "thin-2036",
+      scenarioId: "thin-2035",
       scenarioName: "Thin 20% BA in 2036 DBH >= 6 in",
       units: "tons_carbon",
       points: [
@@ -79,6 +79,7 @@ describe("buildDiagnosticsExport", () => {
     expect(exported.format).toBe("carbine-diagnostics");
     expect(exported.summary.variant).toBe("NE");
     expect(exported.summary.requestMatchesCurrent).toBe(true);
+    expect(exported.summary.resultsCoverRequest).toBe(true);
     expect(exported.summary.runArtifactCount).toBe(1);
     expect(exported.summary.treatmentEffects[0].removedCarbonByYear[0].removedCarbonTons).toBe(1.2);
     expect(exported.summary.treatmentEffects[0].finalSelectedPoolDeltaVsBaselineTons).toBe(-1);
@@ -109,5 +110,18 @@ describe("buildDiagnosticsExport", () => {
     expect(exported.summary.requestMatchesCurrent).toBe(false);
     expect(exported.currentRequest.scenarios).toHaveLength(3);
     expect(exported.request.scenarios).toHaveLength(2);
+  });
+
+  it("flags incomplete result coverage when a scenario was not run", () => {
+    const incompleteResults = {
+      ...results,
+      series: results.series.slice(0, 1),
+      runArtifacts: results.runArtifacts?.slice(0, 1)
+    };
+
+    const exported = JSON.parse(buildDiagnosticsExport(request, incompleteResults, "friendly preview"));
+
+    expect(exported.summary.resultsCoverRequest).toBe(false);
+    expect(exported.summary.missingResultScenarioIds).toEqual(["thin-2035"]);
   });
 });

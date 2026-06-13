@@ -136,6 +136,28 @@ export function App() {
     const parsed = parseInventoryCsv(csv);
     setInventory(parsed.records);
     setProject((current) => normalizeProject({ ...current, ...metadata }));
+    clearRunOutputs();
+  }
+
+  function clearRunOutputs() {
+    setResults(undefined);
+    setLastRunRequest(undefined);
+    setGeneratedPreview("");
+  }
+
+  function updateProject(nextProject: StandProject) {
+    setProject(nextProject);
+    clearRunOutputs();
+  }
+
+  function updateInventory(nextInventory: TreeRecord[]) {
+    setInventory(nextInventory);
+    clearRunOutputs();
+  }
+
+  function updateScenarios(nextScenarios: ScenarioDefinition[]) {
+    setScenarios(nextScenarios);
+    clearRunOutputs();
   }
 
   return (
@@ -144,12 +166,12 @@ export function App() {
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
       <main className="workspace">
         {activeStep === "Inventory" && (
-          <InventoryUpload project={project} inventory={inventory} onProjectChange={setProject} onInventoryChange={setInventory} />
+          <InventoryUpload project={project} inventory={inventory} onProjectChange={updateProject} onInventoryChange={updateInventory} />
         )}
         {activeStep === "Scenario" && (
           <>
-            <VariantPicker project={project} onProjectChange={setProject} />
-            <ScenarioBuilder project={project} scenarios={scenarios} onScenariosChange={setScenarios} />
+            <VariantPicker project={project} onProjectChange={updateProject} />
+            <ScenarioBuilder project={project} scenarios={scenarios} onScenariosChange={updateScenarios} />
           </>
         )}
         {activeStep === "Run" && (
