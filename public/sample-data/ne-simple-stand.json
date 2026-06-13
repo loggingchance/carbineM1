@@ -5,7 +5,8 @@
   "county": "Windsor",
   "areaAcres": 42,
   "inventoryYear": 2026,
-  "projectionYears": 50,
+  "projectionYears": 30,
+  "cycleLengthYears": 5,
   "fvsVariant": "NE",
   "units": "english"
 }

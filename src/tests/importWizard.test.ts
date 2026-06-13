@@ -18,8 +18,24 @@ describe("Inventory Import Wizard utilities", () => {
     expect(mappings.species).toBe("SPP");
     expect(mappings.dbh_in).toBe("DIA");
     expect(normalized.rows).toHaveLength(1);
-    expect(normalized.rows[0].speciesCode).toBe("SUGAR MAPLE");
+    expect(normalized.rows[0].speciesCode).toBe("SM");
     expect(csv.split("\n")[0]).toBe("stand_id,plot_id,tree_id,species,dbh_in,trees_per_acre,height_ft,crown_ratio,status,notes");
+  });
+
+  it("normalizes common species names to FVS species codes", () => {
+    const parsed = parseDelimitedTable(
+      "species,dbh,trees_per_acre,status\nRED SPRUCE,11,0.5,live\nBLACK CHERRY,12,0.7,live\nEASTERN WHITE PINE,13,0.8,live",
+      "csv"
+    );
+    const normalized = normalizeImportRows(
+      parsed,
+      { species: "species", dbh_in: "dbh", trees_per_acre: "trees_per_acre", status: "status" },
+      { dbh: "in", height: "ft", crownRatio: "decimal", blankStatusAsLive: true },
+      "Stand A"
+    );
+
+    expect(normalized.rows.map((row) => row.speciesCode)).toEqual(["RS", "BC", "WP"]);
+    expect(normalized.warnings).toHaveLength(0);
   });
 
   it("detects tab-delimited input and converts metric units", () => {

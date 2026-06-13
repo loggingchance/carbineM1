@@ -81,12 +81,18 @@ export function InventoryUpload({
         <label>
           Projection years
           <select value={project.projectionYears} onChange={(event) => onProjectChange({ ...project, projectionYears: Number(event.target.value) })}>
-            {[10, 20, 30, 50, 100].map((year) => (
+            {[10, 20, 30].map((year) => (
               <option key={year}>{year}</option>
             ))}
           </select>
         </label>
+        <div className="field-note">
+          <strong>Cycle length:</strong> {project.cycleLengthYears ?? 5} years
+        </div>
       </div>
+      <p className="quiet">
+        CARBINE is designed for short-term forest carbon scenario exploration. Results help compare management choices and carbon trajectories; they do not replace a calibrated FVS analysis or a full silvicultural prescription.
+      </p>
 
       <div
         className="dropzone"

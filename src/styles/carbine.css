@@ -755,6 +755,32 @@ button:disabled {
   margin: 1rem 0;
 }
 
+.result-controls {
+  display: grid;
+  gap: 0.45rem;
+  max-width: 720px;
+  margin: 1rem 0;
+}
+
+.result-controls label {
+  max-width: 360px;
+}
+
+.chart-y-label,
+.chart-x-label {
+  color: #58675e;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.chart-y-label {
+  align-self: end;
+}
+
+.chart-x-label {
+  margin-left: calc(180px + 0.75rem);
+}
+
 .chart-row {
   display: grid;
   grid-template-columns: 180px 1fr;
@@ -971,5 +997,9 @@ pre {
 
   .panel-heading {
     display: grid;
+  }
+
+  .chart-x-label {
+    margin-left: 0;
   }
 }

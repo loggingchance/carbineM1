@@ -9,7 +9,8 @@ const request: CarbineRunRequest = {
     standName: "Stand A",
     areaAcres: 10,
     inventoryYear: 2026,
-    projectionYears: 50,
+    projectionYears: 30,
+    cycleLengthYears: 5,
     location: { state: "VT" }
   },
   fvs: { variant: "NE", extensions: { carbon: true } },
@@ -59,6 +60,24 @@ describe("writeKeywordPreview", () => {
     expect(tree).toContain("  4.3000");
   });
 
+  it("maps common species names to NE FVS species codes in official tree files", () => {
+    const tree = writeOfficialTreeFile({
+      ...request,
+      inventory: [
+        { ...request.inventory[0], treeId: "1002", speciesCode: "RED SPRUCE" },
+        { ...request.inventory[0], treeId: "1003", speciesCode: "BLACK CHERRY" },
+        { ...request.inventory[0], treeId: "1004", speciesCode: "EASTERN WHITE PINE" }
+      ]
+    });
+
+    expect(tree).toContain("1RS");
+    expect(tree).toContain("1BC");
+    expect(tree).toContain("1WP");
+    expect(tree).not.toContain("1RE");
+    expect(tree).not.toContain("1BL");
+    expect(tree).not.toContain("1EA");
+  });
+
   it("uses source plot ids while preserving inventory trees-per-acre expansion", () => {
     const robustRequest = {
       ...request,
@@ -88,6 +107,7 @@ describe("writeKeywordPreview", () => {
 
     const key = writeOfficialKeywordFile({ ...request, scenarios: [scenario] }, scenario);
 
+    expect(key).toContain("TIMEINT        5.0");
     expect(key).toContain("THINDBH      2036.0       6.0      18.0      0.25");
   });
 });

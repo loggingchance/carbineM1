@@ -4,9 +4,9 @@ import {
   generatedScenarioName,
   scenarioDisplayName,
   snapTreatmentYear,
-  treatmentYearOptions,
   type ScenarioDefinition
 } from "../domain/scenarioSchema";
+import { generateTreatmentYearOptions } from "../utils/cycleYears";
 
 type ScenarioPreset = "baseline" | "thin-15" | "thin-25" | "thin-35" | "harvest-25" | "custom-thin";
 
@@ -19,7 +19,7 @@ export function ScenarioBuilder({
   scenarios: ScenarioDefinition[];
   onScenariosChange: (scenarios: ScenarioDefinition[]) => void;
 }) {
-  const cycleYears = treatmentYearOptions(project.inventoryYear, project.projectionYears);
+  const treatmentOptions = generateTreatmentYearOptions(project.inventoryYear, project.projectionYears, project.cycleLengthYears ?? 5);
 
   function applyScenarioPreset(scenario: ScenarioDefinition, preset: ScenarioPreset): ScenarioDefinition {
     if (preset === "baseline") {
@@ -38,12 +38,18 @@ export function ScenarioBuilder({
     const treatmentYear = snapTreatmentYear(
       project.inventoryYear,
       project.projectionYears,
-      scenario.treatmentYears[0] ?? project.inventoryYear + 10
+      scenario.treatmentYears[0] ?? project.inventoryYear + (project.cycleLengthYears ?? 5),
+      project.cycleLengthYears ?? 5
     );
     const updated: ScenarioDefinition = {
       ...scenario,
       type,
       treatmentYears: [treatmentYear],
+      treatmentYear: treatmentYear - project.inventoryYear,
+      treatmentType: type,
+      treatmentIntensity: preset === "custom-thin" ? scenario.simpleControls?.percentBasalAreaRemoval ?? 25 : percent,
+      treatmentBasis: "percent_basal_area_removed",
+      cycleLengthYears: project.cycleLengthYears ?? 5,
       simpleControls: {
         minDbhIn: 6,
         ...scenario.simpleControls,
@@ -60,6 +66,7 @@ export function ScenarioBuilder({
   ): ScenarioDefinition {
     return withGeneratedName({
       ...scenario,
+      treatmentIntensity: key === "percentBasalAreaRemoval" ? value : scenario.treatmentIntensity,
       simpleControls: {
         ...scenario.simpleControls,
         [key]: value
@@ -73,7 +80,12 @@ export function ScenarioBuilder({
       name: "Treatment scenario",
       type: "thin",
       startYear: project.inventoryYear,
-      treatmentYears: [project.inventoryYear + 10],
+      treatmentYears: [project.inventoryYear + (project.cycleLengthYears ?? 5)],
+      treatmentYear: project.cycleLengthYears ?? 5,
+      treatmentType: "thin",
+      treatmentIntensity: 25,
+      treatmentBasis: "percent_basal_area_removed",
+      cycleLengthYears: project.cycleLengthYears ?? 5,
       simpleControls: { percentBasalAreaRemoval: 25, minDbhIn: 6 }
     };
     onScenariosChange([
@@ -88,6 +100,9 @@ export function ScenarioBuilder({
         <div>
           <p className="eyebrow">Scenario</p>
           <h2>Build a plain-language treatment timeline</h2>
+          <p className="quiet">
+            These simplified treatment settings are intended for scenario exploration, not as a full silvicultural prescription.
+          </p>
         </div>
         <button type="button" className="secondary" onClick={addThinScenario}>
           <Plus size={18} /> Add scenario
@@ -111,39 +126,46 @@ export function ScenarioBuilder({
                 }
               >
                 <option value="baseline">No treatment</option>
-                <option value="thin-15">Thin 15% BA</option>
-                <option value="thin-25">Thin 25% BA</option>
-                <option value="thin-35">Thin 35% BA</option>
-                <option value="harvest-25">Harvest/remove 25% BA</option>
-                <option value="custom-thin">Custom controls</option>
+                <option value="thin-15">Thin / partial removal - 15% BA</option>
+                <option value="thin-25">Thin / partial removal - 25% BA</option>
+                <option value="thin-35">Thin / partial removal - 35% BA</option>
+                <option value="harvest-25">Harvest / regeneration removal - 25% BA</option>
+                <option value="custom-thin">Custom removal percentage</option>
               </select>
             </label>
             <label>
-              Treatment year
+              Treatment timing
               <select
                 value={snapTreatmentYear(
                   project.inventoryYear,
                   project.projectionYears,
-                  scenario.treatmentYears[0] ?? project.inventoryYear + 10
+                  scenario.treatmentYears[0] ?? project.inventoryYear + (project.cycleLengthYears ?? 5),
+                  project.cycleLengthYears ?? 5
                 )}
                 disabled={scenario.type === "baseline"}
                 onChange={(event) =>
                   onScenariosChange(
                     scenarios.map((item) =>
-                      item.id === scenario.id ? withGeneratedName({ ...item, treatmentYears: [Number(event.target.value)] }) : item
+                      item.id === scenario.id
+                        ? withGeneratedName({
+                            ...item,
+                            treatmentYears: [Number(event.target.value)],
+                            treatmentYear: Number(event.target.value) - project.inventoryYear
+                          })
+                        : item
                     )
                   )
                 }
               >
-                {cycleYears.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
+                {treatmentOptions.map((option) => (
+                  <option key={option.year} value={option.year}>
+                    {option.label}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              BA removal %
+              Removal intensity
               <input
                 type="number"
                 value={scenario.simpleControls?.percentBasalAreaRemoval ?? 0}
@@ -158,6 +180,12 @@ export function ScenarioBuilder({
                   )
                 }
               />
+            </label>
+            <label>
+              Removal basis
+              <select value="percent_basal_area_removed" disabled={scenario.type === "baseline"}>
+                <option value="percent_basal_area_removed">Percent of basal area removed</option>
+              </select>
             </label>
             <label>
               Min DBH
@@ -199,7 +227,7 @@ export function ScenarioBuilder({
               </button>
             )}
             <p className="scenario-control-preview">
-              {scenarioDisplayName(withGeneratedName(scenario))}. {describeActualControls(project, scenario)}
+              {scenarioDisplayName(withGeneratedName(scenario))}. {describePlainControls(project, scenario)}
             </p>
           </article>
         ))}
@@ -223,14 +251,20 @@ function scenarioPreset(scenario: ScenarioDefinition): ScenarioPreset {
   return "custom-thin";
 }
 
-function describeActualControls(project: StandProject, scenario: ScenarioDefinition): string {
-  if (scenario.type === "baseline") return "Actual FVS controls: no treatment keyword";
+function describePlainControls(project: StandProject, scenario: ScenarioDefinition): string {
+  if (scenario.type === "baseline") return "No treatment is applied.";
 
-  const year = snapTreatmentYear(project.inventoryYear, project.projectionYears, scenario.treatmentYears[0] ?? project.inventoryYear + 10);
+  const year = snapTreatmentYear(
+    project.inventoryYear,
+    project.projectionYears,
+    scenario.treatmentYears[0] ?? project.inventoryYear + (project.cycleLengthYears ?? 5),
+    project.cycleLengthYears ?? 5
+  );
   const percent = scenario.simpleControls?.percentBasalAreaRemoval ?? 0;
   const minDbh = scenario.simpleControls?.minDbhIn;
   const maxDbh = scenario.simpleControls?.maxDbhIn;
   const minText = minDbh === undefined ? "0" : String(minDbh);
   const maxText = maxDbh === undefined ? "999" : String(maxDbh);
-  return `Actual FVS controls: THINDBH ${year}, DBH ${minText}-${maxText} in, remove ${percent}%`;
+  const timing = year === project.inventoryYear ? "immediately" : `in ${year}`;
+  return `Treatment scheduled ${timing}; remove ${percent}% of basal area from trees ${minText}-${maxText} in DBH.`;
 }

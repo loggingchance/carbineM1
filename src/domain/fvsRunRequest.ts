@@ -8,6 +8,7 @@ export interface CarbineRunRequest {
     areaAcres: number;
     inventoryYear: number;
     projectionYears: number;
+    cycleLengthYears: number;
     location: {
       state: string;
       county?: string;

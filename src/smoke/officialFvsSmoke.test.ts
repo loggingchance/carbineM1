@@ -21,7 +21,8 @@ describe("official FVS smoke path", () => {
         standName: "NE smoke stand",
         areaAcres: 1,
         inventoryYear: 2026,
-        projectionYears: 50,
+        projectionYears: 30,
+        cycleLengthYears: 5,
         location: { state: "VT", county: "Windsor" }
       },
       fvs: {

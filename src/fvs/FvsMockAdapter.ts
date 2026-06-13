@@ -34,8 +34,9 @@ export class FvsMockAdapter implements FvsAdapter {
 
     const base = request.inventory.reduce((sum, record) => sum + record.dbhIn * record.treesPerAcre, 0) * 0.28;
     const treatmentDip = scenario.type === "baseline" ? 0 : 0.88;
-    const points = Array.from({ length: Math.floor(request.project.projectionYears / 10) + 1 }, (_, index) => {
-      const year = request.project.inventoryYear + index * 10;
+    const cycleLength = request.project.cycleLengthYears ?? 5;
+    const points = Array.from({ length: Math.floor(request.project.projectionYears / cycleLength) + 1 }, (_, index) => {
+      const year = request.project.inventoryYear + index * cycleLength;
       const growth = 1 + index * 0.12;
       const treatmentModifier = scenario.treatmentYears.some((treatmentYear) => year >= treatmentYear) ? treatmentDip : 1;
       const selected = Number((base * growth * treatmentModifier).toFixed(1));

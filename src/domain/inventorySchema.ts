@@ -24,6 +24,7 @@ export interface StandProject {
   areaAcres: number;
   inventoryYear: number;
   projectionYears: number;
+  cycleLengthYears: number;
   fvsVariant: string;
   units: "english";
 }

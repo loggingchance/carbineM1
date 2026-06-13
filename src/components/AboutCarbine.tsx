@@ -24,7 +24,7 @@ export function AboutCarbine() {
         </p>
 
         <p>
-          Much of Dr. Bick's work focuses on making complicated tools, systems, and ideas easier to use in real business and forest management settings. The point is not to remove the power of a good technical tool, but to make that power easier to reach. Otherwise, what good is it?
+          Much of Dr. Bick's work focuses on making complicated tools, systems, and ideas easier to use in real business and forest management settings. The goal is to retain all of the abilities of a good technical tool while removing the barriers to using it. Simplifying access to complex calculations makes things better for the user and, in the end, better for our forests and other natural resources.
         </p>
 
         <p>

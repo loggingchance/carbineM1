@@ -183,10 +183,21 @@ function canonicalSpeciesCode(value: string): string {
     tsuga_canadensis: "EH",
     sugar_maple: "SM",
     acer_saccharum: "SM",
+    red_spruce: "RS",
+    picea_rubens: "RS",
+    black_cherry: "BC",
+    prunus_serotina: "BC",
+    white_pine: "WP",
+    eastern_white_pine: "WP",
+    pinus_strobus: "WP",
     red_oak: "RO",
     northern_red_oak: "RO",
+    quercus_rubra: "RO",
     white_ash: "WA",
-    balsam_fir: "BF"
+    fraxinus_americana: "WA",
+    balsam_fir: "BF",
+    paper_birch: "PB",
+    betula_papyrifera: "PB"
   };
 
   return speciesAliases[normalized] ?? value.trim().toUpperCase();

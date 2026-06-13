@@ -21,6 +21,7 @@ export function buildTesterSummary(request: CarbineRunRequest, results?: Carbine
     `Trees/ac: ${inventory.totalTreesPerAcre.toFixed(1)}`,
     `Basal area: ${inventory.basalAreaFt2PerAcre.toFixed(1)} ft2/ac`,
     `Projection: ${request.project.inventoryYear} plus ${request.project.projectionYears} years`,
+    `Cycle length: ${request.project.cycleLengthYears ?? 5} years`,
     "",
     "Scenarios",
     "---------",
@@ -77,7 +78,7 @@ function formatSeriesSummary(series: CarbonResultSeries): string[] {
     `  Rows parsed: ${series.points.length}`,
     `  First year: ${firstPoint?.year ?? "none"}`,
     `  Final year: ${finalPoint?.year ?? "none"}`,
-    `  Final selected pool total: ${formatCarbon(finalPoint?.selectedPoolTotalCarbonTons)}`,
+    `  Final carbon pool shown: ${formatCarbon(finalPoint?.selectedPoolTotalCarbonTons)}`,
     `  Final live tree carbon: ${formatCarbon(finalPoint?.liveTreeCarbonTons)}`,
     `  Total removed carbon: ${formatCarbon(removedCarbon)}`,
     `  Final basal area: ${formatNumber(finalPoint?.basalAreaFt2PerAcre, 0)} ft2/ac`,
@@ -100,7 +101,7 @@ function formatTreatmentEffects(series: CarbonResultSeries[]): string[] {
         ?? candidate.points[candidate.points.length - 1];
       const baselinePoint = finalPoint ? baselineByYear.get(finalPoint.year) : undefined;
       return [
-        `${candidate.scenarioName} in ${finalPoint?.year ?? "no year"}: selected pool ${formatSignedDelta(finalPoint?.selectedPoolTotalCarbonTons, baselinePoint?.selectedPoolTotalCarbonTons, 1)}, live tree ${formatSignedDelta(finalPoint?.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}, volume ${formatSignedDelta(finalPoint?.totalVolumeCuFt, baselinePoint?.totalVolumeCuFt, 0)}`
+        `${candidate.scenarioName} in ${finalPoint?.year ?? "no year"}: carbon pool shown ${formatSignedDelta(finalPoint?.selectedPoolTotalCarbonTons, baselinePoint?.selectedPoolTotalCarbonTons, 1)}, live tree ${formatSignedDelta(finalPoint?.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}, volume ${formatSignedDelta(finalPoint?.totalVolumeCuFt, baselinePoint?.totalVolumeCuFt, 0)}`
       ];
     });
 

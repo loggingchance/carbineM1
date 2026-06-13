@@ -47,7 +47,8 @@ describe("official FVS run-set guardrails", () => {
           standName: "Stand",
           areaAcres: 1,
           inventoryYear: 2026,
-          projectionYears: 50,
+          projectionYears: 30,
+          cycleLengthYears: 5,
           location: { state: "VT" }
         },
         fvs: { variant: "NE", extensions: { carbon: true } },

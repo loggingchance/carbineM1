@@ -49,12 +49,12 @@ describe("scenarioDisplayName", () => {
 });
 
 describe("FVS treatment cycle years", () => {
-  it("offers post-inventory 10-year FVS cycle years through the projection", () => {
-    expect(treatmentYearOptions(2026, 50)).toEqual([2036, 2046, 2056, 2066, 2076]);
+  it("offers 5-year treatment options and excludes the final projection year", () => {
+    expect(treatmentYearOptions(2026, 30)).toEqual([2026, 2031, 2036, 2041, 2046, 2051]);
   });
 
-  it("snaps off-cycle treatment years to the next FVS cycle year", () => {
-    expect(snapTreatmentYear(2026, 50, 2061)).toBe(2066);
-    expect(snapTreatmentYear(2026, 50, 2063)).toBe(2066);
+  it("snaps off-cycle treatment years to the next 5-year cycle year", () => {
+    expect(snapTreatmentYear(2026, 30, 2032)).toBe(2036);
+    expect(snapTreatmentYear(2026, 30, 2056)).toBe(2051);
   });
 });

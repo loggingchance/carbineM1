@@ -1,3 +1,5 @@
+import { generateTreatmentYearOptions, snapTreatmentYear as snapCycleTreatmentYear } from "../utils/cycleYears";
+
 export type ScenarioType = "baseline" | "thin" | "harvest" | "custom";
 
 export interface ScenarioDefinition {
@@ -7,6 +9,11 @@ export interface ScenarioDefinition {
   type: ScenarioType;
   startYear: number;
   treatmentYears: number[];
+  treatmentYear?: number;
+  treatmentType?: string;
+  treatmentIntensity?: number;
+  treatmentBasis?: string;
+  cycleLengthYears?: number;
   simpleControls?: {
     residualBasalAreaFt2Ac?: number;
     percentBasalAreaRemoval?: number;
@@ -33,26 +40,24 @@ export const lightThinScenario = (inventoryYear: number): ScenarioDefinition => 
   description: "Development scenario for UI testing. FVS keyword mapping requires review.",
   type: "thin",
   startYear: inventoryYear,
-  treatmentYears: [inventoryYear + 10],
+  treatmentYears: [inventoryYear + 5],
+  treatmentYear: 5,
+  treatmentType: "thin",
+  treatmentIntensity: 20,
+  treatmentBasis: "percent_basal_area_removed",
+  cycleLengthYears: 5,
   simpleControls: {
     percentBasalAreaRemoval: 20,
     minDbhIn: 6
   }
 });
 
-export function treatmentYearOptions(inventoryYear: number, projectionYears: number): number[] {
-  const cycleLength = 10;
-  const lastYear = inventoryYear + Math.max(cycleLength, projectionYears);
-  const years: number[] = [];
-  for (let year = inventoryYear + cycleLength; year <= lastYear; year += cycleLength) {
-    years.push(year);
-  }
-  return years;
+export function treatmentYearOptions(inventoryYear: number, projectionYears: number, cycleLengthYears = 5): number[] {
+  return generateTreatmentYearOptions(inventoryYear, projectionYears, cycleLengthYears).map((option) => option.year);
 }
 
-export function snapTreatmentYear(inventoryYear: number, projectionYears: number, year: number): number {
-  const options = treatmentYearOptions(inventoryYear, projectionYears);
-  return options.find((option) => option >= year) ?? options[options.length - 1];
+export function snapTreatmentYear(inventoryYear: number, projectionYears: number, year: number, cycleLengthYears = 5): number {
+  return snapCycleTreatmentYear(inventoryYear, projectionYears, year, cycleLengthYears);
 }
 
 export function generatedScenarioName(scenario: ScenarioDefinition): string {

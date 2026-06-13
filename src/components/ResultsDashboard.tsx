@@ -1,5 +1,14 @@
+import { useState } from "react";
 import { BarChart3 } from "lucide-react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
+import {
+  carbonPoolHelp,
+  carbonPoolLabels,
+  carbonPoolOptions,
+  getCarbonPoolValue,
+  type CarbonPoolKey
+} from "../utils/carbonPools";
+import { calculateRecoveryMetrics } from "../utils/recoveryMetrics";
 
 export function ResultsDashboard({
   results,
@@ -10,6 +19,8 @@ export function ResultsDashboard({
   onGoToRun: () => void;
   onGoToAdvanced: () => void;
 }) {
+  const [carbonPoolShown, setCarbonPoolShown] = useState<CarbonPoolKey>("total");
+
   if (!results) {
     return (
       <section className="panel empty">
@@ -42,10 +53,10 @@ export function ResultsDashboard({
 
   const maxValue = Math.max(
     1,
-    ...results.series.flatMap((series) => series.points.map((point) => point.selectedPoolTotalCarbonTons ?? 0))
+    ...results.series.flatMap((series) => series.points.map((point) => getCarbonPoolValue(point, carbonPoolShown) ?? 0))
   );
   const summaries = results.series.map((series) => {
-    const carbonPoints = series.points.filter((point) => point.selectedPoolTotalCarbonTons !== undefined);
+    const carbonPoints = series.points.filter((point) => getCarbonPoolValue(point, carbonPoolShown) !== undefined);
     const firstPoint = carbonPoints[0] ?? series.points[0];
     const finalPoint = carbonPoints[carbonPoints.length - 1] ?? series.points[series.points.length - 1];
     const removedCarbon = series.points.reduce((total, point) => total + (point.harvestedCarbonTons ?? 0), 0);
@@ -63,6 +74,19 @@ export function ResultsDashboard({
         .map((point) => ({ series, point, baseline: baselineByYear.get(point.year) }))
         .filter(({ baseline }) => baseline !== undefined)
     );
+  const recoveryRows = results.series
+    .filter((series) => series.scenarioId !== baselineSeries.scenarioId)
+    .map((series) => {
+      const treatmentYear =
+        series.points.find((point) => (point.harvestedCarbonTons ?? 0) > 0)?.year ??
+        series.points[1]?.year ??
+        series.points[0]?.year ??
+        0;
+      return {
+        series,
+        metrics: calculateRecoveryMetrics(baselineSeries, series, treatmentYear, carbonPoolShown)
+      };
+    });
 
   return (
     <section className="panel">
@@ -73,7 +97,19 @@ export function ResultsDashboard({
         </div>
         <strong className={results.isRealFvs ? "real-badge" : "demo-badge"}>{results.isRealFvs ? "Real FVS runtime" : "Demo output"}</strong>
       </div>
-      <div className="chart" aria-label="Selected pool carbon chart">
+      <div className="result-controls">
+        <label>
+          Carbon pool shown
+          <select value={carbonPoolShown} onChange={(event) => setCarbonPoolShown(event.target.value as CarbonPoolKey)}>
+            {carbonPoolOptions.map((option) => (
+              <option key={option.key} value={option.key}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <p className="quiet">{carbonPoolHelp}</p>
+      </div>
+      <div className="chart" aria-label={`${carbonPoolLabels[carbonPoolShown]} chart`}>
+        <div className="chart-y-label">Carbon stock (tons C/ac)</div>
         {results.series.map((series) => (
           <div className="chart-row" key={series.scenarioId}>
             <span>{series.scenarioName}</span>
@@ -81,13 +117,14 @@ export function ResultsDashboard({
               {series.points.map((point) => (
                 <i
                   key={`${series.scenarioId}-${point.year}`}
-                  title={`${point.year}: ${point.selectedPoolTotalCarbonTons} tons C`}
-                  style={{ height: `${Math.max(6, ((point.selectedPoolTotalCarbonTons ?? 0) / maxValue) * 100)}%` }}
+                  title={`${point.year}: ${formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)} tons C/ac`}
+                  style={{ height: `${Math.max(6, ((getCarbonPoolValue(point, carbonPoolShown) ?? 0) / maxValue) * 100)}%` }}
                 />
               ))}
             </div>
           </div>
         ))}
+        <div className="chart-x-label">Projection year</div>
       </div>
       <div className="result-summary-grid" aria-label="Scenario result summary">
         {summaries.map(({ series, firstPoint, finalPoint, removedCarbon, firstRemovalYear }) => (
@@ -95,8 +132,8 @@ export function ResultsDashboard({
             <h3>{series.scenarioName}</h3>
             <dl>
               <div>
-                <dt>Selected pool</dt>
-                <dd>{formatCarbon(finalPoint?.selectedPoolTotalCarbonTons)}</dd>
+                <dt>Carbon pool shown</dt>
+                <dd>{formatCarbon(getCarbonPoolValue(finalPoint, carbonPoolShown))}</dd>
               </div>
               <div>
                 <dt>Live tree carbon</dt>
@@ -114,6 +151,46 @@ export function ResultsDashboard({
           </article>
         ))}
       </div>
+      {recoveryRows.length > 0 && (
+        <div className="results-section">
+          <h3>Treatment and recovery summary</h3>
+          <p className="quiet">
+            Pre-treatment carbon is approximated from the matching no-treatment output or the prior projection step when FVS does not report separate before/after values at the treatment year.
+          </p>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>Treatment year</th>
+                  <th>Pre-treatment carbon</th>
+                  <th>Post-treatment carbon</th>
+                  <th>Immediate change</th>
+                  <th>Lowest post-treatment carbon</th>
+                  <th>End-of-run carbon</th>
+                  <th>End difference vs no action</th>
+                  <th>Recovery year</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recoveryRows.map(({ series, metrics }) => (
+                  <tr key={`${series.scenarioId}-recovery`}>
+                    <td>{series.scenarioName}</td>
+                    <td>{metrics.treatmentYear}</td>
+                    <td>{formatNumber(metrics.preTreatmentCarbon, 1)}</td>
+                    <td>{formatNumber(metrics.postTreatmentCarbon, 1)}</td>
+                    <td>{formatSignedNumber(metrics.immediateChange, 1)}</td>
+                    <td>{formatNumber(metrics.lowestPostTreatmentCarbon, 1)}</td>
+                    <td>{formatNumber(metrics.endCarbon, 1)}</td>
+                    <td>{formatSignedNumber(metrics.endDifferenceVsNoAction, 1)}</td>
+                    <td>{metrics.recoveryYear ?? "Not recovered within projection period"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       {comparisonRows.length > 0 && (
         <div className="results-section">
           <h3>Treatment effects vs no treatment</h3>
@@ -123,7 +200,7 @@ export function ResultsDashboard({
                 <tr>
                   <th>Scenario</th>
                   <th>Year</th>
-                  <th>Selected pool total</th>
+                  <th>Carbon pool shown</th>
                   <th>Change vs baseline</th>
                   <th>Live tree carbon</th>
                   <th>Change vs baseline</th>
@@ -137,8 +214,8 @@ export function ResultsDashboard({
                   <tr key={`${series.scenarioId}-${point.year}-baseline-delta`}>
                     <td>{series.scenarioName}</td>
                     <td>{point.year}</td>
-                    <td>{formatNumber(point.selectedPoolTotalCarbonTons, 1)}</td>
-                    <td>{formatSignedDelta(point.selectedPoolTotalCarbonTons, baseline?.selectedPoolTotalCarbonTons, 1)}</td>
+                    <td>{formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
+                    <td>{formatSignedDelta(getCarbonPoolValue(point, carbonPoolShown), getCarbonPoolValue(baseline, carbonPoolShown), 1)}</td>
                     <td>{formatNumber(point.liveTreeCarbonTons, 1)}</td>
                     <td>{formatSignedDelta(point.liveTreeCarbonTons, baseline?.liveTreeCarbonTons, 1)}</td>
                     <td>{formatNumber(point.harvestedCarbonTons, 1)}</td>
@@ -157,7 +234,7 @@ export function ResultsDashboard({
             <tr>
               <th>Scenario</th>
               <th>Year</th>
-              <th>Selected pool total</th>
+              <th>Carbon pool shown</th>
               <th>Live tree carbon</th>
               <th>Removed carbon</th>
               <th>Total volume</th>
@@ -172,7 +249,7 @@ export function ResultsDashboard({
                 <tr key={`${series.scenarioId}-${point.year}`}>
                   <td>{series.scenarioName}</td>
                   <td>{point.year}</td>
-                  <td>{formatNumber(point.selectedPoolTotalCarbonTons, 1)}</td>
+                  <td>{formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
                   <td>{formatNumber(point.liveTreeCarbonTons, 1)}</td>
                   <td>{formatNumber(point.harvestedCarbonTons, 1)}</td>
                   <td>{formatNumber(point.totalVolumeCuFt, 0)}</td>
@@ -207,4 +284,9 @@ function formatSignedDelta(value: number | undefined, baseline: number | undefin
   if (value === undefined || baseline === undefined) return "";
   const delta = value - baseline;
   return `${delta >= 0 ? "+" : ""}${delta.toFixed(digits)}`;
+}
+
+function formatSignedNumber(value: number | undefined, digits: number): string {
+  if (value === undefined) return "";
+  return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
 }

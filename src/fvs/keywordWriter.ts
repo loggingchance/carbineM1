@@ -8,15 +8,30 @@ const neSpeciesCodes: Record<string, string> = {
   "YELLOW BIRCH": "YB",
   "EASTERN HEMLOCK": "EH",
   "SUGAR MAPLE": "SM",
+  "RED SPRUCE": "RS",
+  "BLACK CHERRY": "BC",
+  "EASTERN WHITE PINE": "WP",
+  "WHITE PINE": "WP",
+  "WHITE ASH": "WA",
+  "PAPER BIRCH": "PB",
+  "NORTHERN RED OAK": "RO",
+  "RED OAK": "RO",
   RM: "RM",
   AB: "AB",
   YB: "YB",
   EH: "EH",
-  SM: "SM"
+  SM: "SM",
+  RS: "RS",
+  BC: "BC",
+  WP: "WP",
+  WA: "WA",
+  PB: "PB",
+  RO: "RO"
 };
 
 export function writeKeywordPreview(request: CarbineRunRequest, scenario: ScenarioDefinition): string {
   const name = scenarioDisplayName(scenario);
+  const cycleLength = request.project.cycleLengthYears ?? 5;
   const lines = [
     `* CARBINE generated keyword preview`,
     `* Project: ${request.project.projectName}`,
@@ -25,7 +40,8 @@ export function writeKeywordPreview(request: CarbineRunRequest, scenario: Scenar
     `* Scenario: ${name}`,
     `* WARNING: Review against official FVS examples before real execution.`,
     `INVYEAR ${request.project.inventoryYear}`,
-    `NUMCYCLE ${Math.max(1, Math.ceil(request.project.projectionYears / 10))}`,
+    `NUMCYCLE ${Math.max(1, Math.ceil(request.project.projectionYears / cycleLength))}`,
+    `TIMEINT ${cycleLength}`,
     `* Carbon reporting keywords are intentionally not finalized in this preview.`
   ];
 
@@ -33,9 +49,6 @@ export function writeKeywordPreview(request: CarbineRunRequest, scenario: Scenar
     lines.push(`* Treatment requested in years: ${scenario.treatmentYears.join(", ")}`);
     if (scenario.simpleControls?.percentBasalAreaRemoval) {
       lines.push(`* Percent basal area removal: ${scenario.simpleControls.percentBasalAreaRemoval}`);
-    }
-    if (scenario.simpleControls?.residualBasalAreaFt2Ac) {
-      lines.push(`* Residual basal area target: ${scenario.simpleControls.residualBasalAreaFt2Ac} ft2/ac`);
     }
   }
 
@@ -68,7 +81,8 @@ export function writeInventoryPreview(request: CarbineRunRequest): string {
 
 export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: ScenarioDefinition): string {
   const name = scenarioDisplayName(scenario);
-  const cycles = Math.max(1, Math.ceil(request.project.projectionYears / 10));
+  const cycleLength = request.project.cycleLengthYears ?? 5;
+  const cycles = Math.max(1, Math.ceil(request.project.projectionYears / cycleLength));
   const lines = [
     "SCREEN",
     "NOAUTOES",
@@ -81,6 +95,7 @@ export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: S
     "SITECODE          13        56",
     `INVYEAR       ${request.project.inventoryYear.toFixed(1)}`,
     `NUMCYCLE        ${cycles.toFixed(1)}`,
+    `TIMEINT        ${cycleLength.toFixed(1)}`,
     "TREEFMT",
     "(I4,I8,F8.4,I2,A8,F8.2,F8.2,F8.2,F8.2,F8.2,I4,6I4,I4,I4,5I4,F8.0)",
     "",
@@ -98,7 +113,7 @@ export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: S
   ];
 
   if ((scenario.type === "thin" || scenario.type === "harvest") && scenario.simpleControls?.percentBasalAreaRemoval) {
-    const treatmentYear = scenario.treatmentYears[0] ?? request.project.inventoryYear + 10;
+    const treatmentYear = scenario.treatmentYears[0] ?? request.project.inventoryYear + cycleLength;
     const removalFraction = Math.max(0, Math.min(1, scenario.simpleControls.percentBasalAreaRemoval / 100));
     const minDbh = scenario.simpleControls.minDbhIn ?? 0;
     const maxDbh = scenario.simpleControls.maxDbhIn ?? 999;

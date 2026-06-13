@@ -10,7 +10,8 @@ const request: CarbineRunRequest = {
     standName: "Stand A",
     areaAcres: 10,
     inventoryYear: 2026,
-    projectionYears: 50,
+    projectionYears: 30,
+    cycleLengthYears: 5,
     location: { state: "VT" }
   },
   fvs: { variant: "NE", extensions: { carbon: true } },
@@ -66,9 +67,9 @@ describe("buildTesterSummary", () => {
     const summary = buildTesterSummary(request, results);
 
     expect(summary).toContain("Runtime: Real official FVS output");
-    expect(summary).toContain("Final selected pool total: 11.0 tons C");
+    expect(summary).toContain("Final carbon pool shown: 11.0 tons C");
     expect(summary).toContain("Treatment Effects vs Baseline");
-    expect(summary).toContain("selected pool -1.0");
+    expect(summary).toContain("carbon pool shown -1.0");
     expect(summary).toContain("No treatment: baseline warning");
     expect(summary).toContain("carbine-diagnostics*.json");
     expect(summary).toContain("CARBINE is not an official USDA Forest Service product.");

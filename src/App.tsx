@@ -35,7 +35,8 @@ const initialProject: StandProject = {
   county: "Windsor",
   areaAcres: 42,
   inventoryYear: 2026,
-  projectionYears: 50,
+  projectionYears: 30,
+  cycleLengthYears: 5,
   fvsVariant: "NE",
   units: "english"
 };
@@ -53,7 +54,7 @@ interface StoredDraft {
 
 export function App() {
   const storedDraft = loadStoredDraft();
-  const draftProject = storedDraft?.project ?? initialProject;
+  const draftProject = normalizeProject(storedDraft?.project ?? initialProject);
   const [activeStep, setActiveStep] = useState<WorkflowStep>("Inventory");
   const [project, setProject] = useState<StandProject>(draftProject);
   const [inventory, setInventory] = useState<TreeRecord[]>(storedDraft?.inventory ?? []);
@@ -91,6 +92,7 @@ export function App() {
         areaAcres: project.areaAcres,
         inventoryYear: project.inventoryYear,
         projectionYears: project.projectionYears,
+        cycleLengthYears: project.cycleLengthYears ?? 5,
         location: {
           state: project.state,
           county: project.county,
@@ -130,7 +132,7 @@ export function App() {
     const metadata = await fetch("./sample-data/ne-simple-stand.json").then((response) => response.json());
     const parsed = parseInventoryCsv(csv);
     setInventory(parsed.records);
-    setProject((current) => ({ ...current, ...metadata }));
+    setProject((current) => normalizeProject({ ...current, ...metadata }));
   }
 
   return (
@@ -178,6 +180,14 @@ export function App() {
   );
 }
 
+function normalizeProject(project: StandProject): StandProject {
+  return {
+    ...project,
+    projectionYears: [10, 20, 30].includes(project.projectionYears) ? project.projectionYears : 30,
+    cycleLengthYears: project.cycleLengthYears ?? 5
+  };
+}
+
 function loadStoredDraft(): StoredDraft | undefined {
   try {
     const raw = localStorage.getItem(storageKey);
@@ -189,10 +199,19 @@ function loadStoredDraft(): StoredDraft | undefined {
 
 function sanitizeScenario(project: StandProject, scenario: ScenarioDefinition): ScenarioDefinition {
   if (scenario.type !== "baseline") {
-    const years = scenario.treatmentYears.length > 0 ? scenario.treatmentYears : [project.inventoryYear + 10];
+    const years = scenario.treatmentYears.length > 0 ? scenario.treatmentYears : [project.inventoryYear + (project.cycleLengthYears ?? 5)];
+    const treatmentYears = years.map((year) =>
+      snapTreatmentYear(project.inventoryYear, project.projectionYears, year, project.cycleLengthYears ?? 5)
+    );
+    const treatmentYear = Math.max(0, treatmentYears[0] - project.inventoryYear);
     const sanitized = {
       ...scenario,
-      treatmentYears: years.map((year) => snapTreatmentYear(project.inventoryYear, project.projectionYears, year))
+      treatmentYears,
+      treatmentYear,
+      treatmentType: scenario.type,
+      treatmentIntensity: scenario.simpleControls?.percentBasalAreaRemoval ?? scenario.treatmentIntensity,
+      treatmentBasis: scenario.treatmentBasis ?? "percent_basal_area_removed",
+      cycleLengthYears: project.cycleLengthYears ?? 5
     };
     return {
       ...sanitized,
