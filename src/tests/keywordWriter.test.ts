@@ -107,7 +107,7 @@ describe("writeKeywordPreview", () => {
 
     const key = writeOfficialKeywordFile({ ...request, scenarios: [scenario] }, scenario);
 
-    expect(key).toContain("TIMEINT        5.0");
+    expect(key).toContain("TIMEINT         0.0       5.0");
     expect(key).toContain("THINDBH      2036.0       6.0      18.0      0.25");
   });
 });

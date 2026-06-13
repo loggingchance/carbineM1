@@ -41,7 +41,7 @@ export function writeKeywordPreview(request: CarbineRunRequest, scenario: Scenar
     `* WARNING: Review against official FVS examples before real execution.`,
     `INVYEAR ${request.project.inventoryYear}`,
     `NUMCYCLE ${Math.max(1, Math.ceil(request.project.projectionYears / cycleLength))}`,
-    `TIMEINT ${cycleLength}`,
+    `TIMEINT 0 ${cycleLength}`,
     `* Carbon reporting keywords are intentionally not finalized in this preview.`
   ];
 
@@ -95,7 +95,7 @@ export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: S
     "SITECODE          13        56",
     `INVYEAR       ${request.project.inventoryYear.toFixed(1)}`,
     `NUMCYCLE        ${cycles.toFixed(1)}`,
-    `TIMEINT        ${cycleLength.toFixed(1)}`,
+    `TIMEINT         0.0       ${cycleLength.toFixed(1)}`,
     "TREEFMT",
     "(I4,I8,F8.4,I2,A8,F8.2,F8.2,F8.2,F8.2,F8.2,I4,6I4,I4,I4,5I4,F8.0)",
     "",
