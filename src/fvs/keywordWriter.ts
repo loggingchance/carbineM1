@@ -32,6 +32,7 @@ const neSpeciesCodes: Record<string, string> = {
 export function writeKeywordPreview(request: CarbineRunRequest, scenario: ScenarioDefinition): string {
   const name = scenarioDisplayName(scenario);
   const cycleLength = request.project.cycleLengthYears ?? 5;
+  const cycles = fvsCycleCountForCarbonReport(request.project.projectionYears, cycleLength);
   const lines = [
     `* CARBINE generated keyword preview`,
     `* Project: ${request.project.projectName}`,
@@ -40,7 +41,7 @@ export function writeKeywordPreview(request: CarbineRunRequest, scenario: Scenar
     `* Scenario: ${name}`,
     `* WARNING: Review against official FVS examples before real execution.`,
     `INVYEAR ${request.project.inventoryYear}`,
-    `NUMCYCLE ${Math.max(1, Math.ceil(request.project.projectionYears / cycleLength))}`,
+    `NUMCYCLE ${cycles}`,
     `TIMEINT 0 ${cycleLength}`,
     `* Carbon reporting keywords are intentionally not finalized in this preview.`
   ];
@@ -82,7 +83,7 @@ export function writeInventoryPreview(request: CarbineRunRequest): string {
 export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: ScenarioDefinition): string {
   const name = scenarioDisplayName(scenario);
   const cycleLength = request.project.cycleLengthYears ?? 5;
-  const cycles = Math.max(1, Math.ceil(request.project.projectionYears / cycleLength));
+  const cycles = fvsCycleCountForCarbonReport(request.project.projectionYears, cycleLength);
   const lines = [
     "SCREEN",
     "NOAUTOES",
@@ -200,4 +201,8 @@ function intField(value: number, width: number): string {
 
 function numberField(value: number, width: number, decimals: number): string {
   return value.toFixed(decimals).padStart(width, " ");
+}
+
+function fvsCycleCountForCarbonReport(projectionYears: number, cycleLengthYears: number): number {
+  return Math.max(2, Math.ceil(projectionYears / cycleLengthYears) + 1);
 }

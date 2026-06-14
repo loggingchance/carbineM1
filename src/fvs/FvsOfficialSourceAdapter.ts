@@ -105,7 +105,10 @@ export class FvsOfficialSourceAdapter implements FvsAdapter {
         runLog: [`Executable: ${bridge.exePath ?? "not reported"}`, bridge.stdout, bridge.stderr, rawOutputText].filter(Boolean).join("\n\n"),
         rawOutputs: files
       },
-      parsedCarbon: parseFvsSummaryOutput(parseText, scenarioId, scenarioDisplayName(scenario), Object.keys(files))
+      parsedCarbon: trimSeriesToProjectionEnd(
+        parseFvsSummaryOutput(parseText, scenarioId, scenarioDisplayName(scenario), Object.keys(files)),
+        request
+      )
     };
   }
 
@@ -128,6 +131,14 @@ export class FvsOfficialSourceAdapter implements FvsAdapter {
       }))
     };
   }
+}
+
+function trimSeriesToProjectionEnd(series: ReturnType<typeof parseFvsSummaryOutput>, request: CarbineRunRequest): ReturnType<typeof parseFvsSummaryOutput> {
+  const projectionEndYear = request.project.inventoryYear + request.project.projectionYears;
+  return {
+    ...series,
+    points: series.points.filter((point) => point.year <= projectionEndYear)
+  };
 }
 
 export function addInitialYearConsistencyWarnings(request: CarbineRunRequest, series: CarbineScenarioResults["series"]): void {
