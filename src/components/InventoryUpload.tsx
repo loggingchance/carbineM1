@@ -70,17 +70,17 @@ export function InventoryUpload({
           <p className="eyebrow">Inventory</p>
           <h2>Start with a stand inventory</h2>
         </div>
-        <button type="button" className="secondary" onClick={loadSample}>
-          <FileDown size={18} /> Load sample
-        </button>
-      </div>
-      <div className="button-row">
-        <button type="button" className="secondary" onClick={() => downloadCsv("carbine-blank-inventory-template.csv", blankTemplateCsv)}>
-          <FileDown size={18} /> Blank CSV template
-        </button>
-        <button type="button" className="secondary" onClick={downloadSampleCsv}>
-          <FileDown size={18} /> Example CSV
-        </button>
+        <div className="button-row">
+          <button type="button" className="secondary" onClick={() => downloadCsv("carbine-blank-inventory-template.csv", blankTemplateCsv)}>
+            <FileDown size={18} /> Download formatted CSV template
+          </button>
+          <button type="button" className="secondary" onClick={downloadSampleCsv}>
+            <FileDown size={18} /> Download example CSV
+          </button>
+          <button type="button" className="secondary" onClick={loadSample}>
+            <FileDown size={18} /> Load sample
+          </button>
+        </div>
       </div>
 
       <div className="grid two">
@@ -140,6 +140,9 @@ export function InventoryUpload({
       </div>
       <p className="quiet">
         CARBINE is designed for short-term forest carbon scenario exploration. Results help compare management choices and carbon trajectories; they do not replace a calibrated FVS analysis or a full silvicultural prescription.
+      </p>
+      <p className="quiet">
+        The formatted CSV template uses the required columns first: stand_id, species_code, dbh_in, and trees_per_acre.
       </p>
 
       <div
