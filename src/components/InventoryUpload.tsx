@@ -21,6 +21,19 @@ export function InventoryUpload({
   const [messages, setMessages] = useState<ValidationMessage[]>([]);
   const [showWizard, setShowWizard] = useState(false);
   const summary = summarizeInventory(inventory);
+  const blankTemplateCsv = [
+    "stand_id,species_code,dbh_in,trees_per_acre,plot_id,tree_id,height_ft,crown_ratio,status,notes"
+  ].join("\n");
+
+  function downloadCsv(filename: string, text: string) {
+    const blob = new Blob([text.endsWith("\n") ? text : `${text}\n`], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function loadSample() {
     const csv = await fetch("./sample-data/ne-simple-stand.csv").then((response) => response.text());
@@ -30,6 +43,11 @@ export function InventoryUpload({
     onProjectChange({ ...project, ...metadata });
     setFileName("ne-simple-stand.csv");
     setMessages(parsed.validation.messages.length > 0 ? parsed.validation.messages : [{ severity: "info", message: "Sample inventory loaded." }]);
+  }
+
+  async function downloadSampleCsv() {
+    const csv = await fetch("./sample-data/ne-simple-stand.csv").then((response) => response.text());
+    downloadCsv("carbine-example-inventory.csv", csv);
   }
 
   async function readFile(file: File) {
@@ -54,6 +72,14 @@ export function InventoryUpload({
         </div>
         <button type="button" className="secondary" onClick={loadSample}>
           <FileDown size={18} /> Load sample
+        </button>
+      </div>
+      <div className="button-row">
+        <button type="button" className="secondary" onClick={() => downloadCsv("carbine-blank-inventory-template.csv", blankTemplateCsv)}>
+          <FileDown size={18} /> Blank CSV template
+        </button>
+        <button type="button" className="secondary" onClick={downloadSampleCsv}>
+          <FileDown size={18} /> Example CSV
         </button>
       </div>
 
@@ -88,6 +114,28 @@ export function InventoryUpload({
         </label>
         <div className="field-note">
           <strong>Cycle length:</strong> {project.cycleLengthYears ?? 5} years
+        </div>
+        <label>
+          Site index
+          <input
+            type="number"
+            value={project.siteIndex ?? 56}
+            onChange={(event) => onProjectChange({ ...project, siteIndex: Number(event.target.value) })}
+          />
+        </label>
+        <label>
+          Site index species code
+          <input
+            type="number"
+            value={project.siteSpeciesCode ?? 13}
+            onChange={(event) => onProjectChange({ ...project, siteSpeciesCode: Number(event.target.value) })}
+          />
+        </label>
+        <div className="field-note">
+          <strong>Default SI in use:</strong> {project.siteIndex ?? 56} for species code {project.siteSpeciesCode ?? 13}. Change this before running if your stand uses a different FVS site index.
+        </div>
+        <div className="field-note wide-note">
+          <strong>Inventory design:</strong> expanded trees per acre. CARBINE currently expects each tree row to include its own TPA value, writes that expansion into the FVS tree file, and uses a fixed DESIGN line for the stand run. Raw prism, fixed-area plot, and other cruise designs should be converted to tree-level TPA before upload.
         </div>
       </div>
       <p className="quiet">

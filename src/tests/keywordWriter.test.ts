@@ -11,6 +11,9 @@ const request: CarbineRunRequest = {
     inventoryYear: 2026,
     projectionYears: 30,
     cycleLengthYears: 5,
+    siteSpeciesCode: 13,
+    siteIndex: 56,
+    inventoryDesign: "expanded_tpa",
     location: { state: "VT" }
   },
   fvs: { variant: "NE", extensions: { carbon: true } },
@@ -109,6 +112,7 @@ describe("writeKeywordPreview", () => {
 
     expect(key).toContain("NUMCYCLE        7.0");
     expect(key).toContain("TIMEINT         0.0       5.0");
+    expect(key).toContain("SITECODE          13        56");
     expect(key).toContain("THINDBH      2036.0       6.0      18.0      0.25");
   });
 });

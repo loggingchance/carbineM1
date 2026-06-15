@@ -25,6 +25,9 @@ export interface StandProject {
   inventoryYear: number;
   projectionYears: number;
   cycleLengthYears: number;
+  siteSpeciesCode: number;
+  siteIndex: number;
+  inventoryDesign: "expanded_tpa";
   fvsVariant: string;
   units: "english";
 }
@@ -45,7 +48,7 @@ export const requiredInventoryColumns = [
 ] as const;
 
 export const inventoryColumnHelp =
-  "Needed columns: stand_id, species_code, dbh_in, and trees_per_acre. Common headings like Stand, Species, DBH, and TPA are accepted.";
+  "Needed columns: stand_id, species_code, dbh_in, and trees_per_acre. CARBINE currently expects each tree row to include expanded trees per acre; common headings like Stand, Species, DBH, and TPA are accepted.";
 
 export function summarizeInventory(records: TreeRecord[]): InventorySummary {
   if (records.length === 0) {

@@ -23,6 +23,9 @@ describe("official FVS smoke path", () => {
         inventoryYear: 2026,
         projectionYears: 30,
         cycleLengthYears: 5,
+        siteSpeciesCode: 13,
+        siteIndex: 56,
+        inventoryDesign: "expanded_tpa",
         location: { state: "VT", county: "Windsor" }
       },
       fvs: {

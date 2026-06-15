@@ -37,6 +37,9 @@ const initialProject: StandProject = {
   inventoryYear: 2026,
   projectionYears: 30,
   cycleLengthYears: 5,
+  siteSpeciesCode: 13,
+  siteIndex: 56,
+  inventoryDesign: "expanded_tpa",
   fvsVariant: "NE",
   units: "english"
 };
@@ -95,6 +98,9 @@ export function App() {
         inventoryYear: project.inventoryYear,
         projectionYears: project.projectionYears,
         cycleLengthYears: project.cycleLengthYears ?? 5,
+        siteSpeciesCode: project.siteSpeciesCode ?? 13,
+        siteIndex: project.siteIndex ?? 56,
+        inventoryDesign: project.inventoryDesign ?? "expanded_tpa",
         location: {
           state: project.state,
           county: project.county,
@@ -224,7 +230,10 @@ function normalizeProject(project: StandProject): StandProject {
   return {
     ...project,
     projectionYears: [10, 20, 30].includes(project.projectionYears) ? project.projectionYears : 30,
-    cycleLengthYears: project.cycleLengthYears ?? 5
+    cycleLengthYears: project.cycleLengthYears ?? 5,
+    siteSpeciesCode: project.siteSpeciesCode ?? 13,
+    siteIndex: project.siteIndex ?? 56,
+    inventoryDesign: project.inventoryDesign ?? "expanded_tpa"
   };
 }
 

@@ -9,6 +9,9 @@ export interface CarbineRunRequest {
     inventoryYear: number;
     projectionYears: number;
     cycleLengthYears: number;
+    siteSpeciesCode: number;
+    siteIndex: number;
+    inventoryDesign: "expanded_tpa";
     location: {
       state: string;
       county?: string;

@@ -11,6 +11,9 @@ const request: CarbineRunRequest = {
     inventoryYear: 2026,
     projectionYears: 30,
     cycleLengthYears: 5,
+    siteSpeciesCode: 13,
+    siteIndex: 56,
+    inventoryDesign: "expanded_tpa",
     location: { state: "VT" }
   },
   fvs: { variant: "NE", extensions: { carbon: true } },
