@@ -3,10 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CARBINE is a browser-based forest carbon scenario explorer powered by the USDA Forest Service Forest Vegetation Simulator. Compare management scenarios, carbon estimates, volume, and stand conditions." />
+    <meta name="keywords" content="forest carbon, FVS, Forest Vegetation Simulator, forestry, carbon modeling, carbon estimates, forest management, silviculture, USDA Forest Service" />
+    <meta name="author" content="Dr. Steven Bick" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#143d2d" />
+    <link rel="canonical" href="https://carbine.forestenterprise.org/" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CARBINE" />
+    <meta property="og:title" content="CARBINE | Forest Carbon Scenario Explorer" />
+    <meta property="og:description" content="Explore forest carbon and management scenarios using the calculation strength of the USDA Forest Service Forest Vegetation Simulator." />
+    <meta property="og:url" content="https://carbine.forestenterprise.org/" />
+    <meta property="og:image" content="https://carbine.forestenterprise.org/carbine-header.jpg" />
+    <meta property="og:image:width" content="2508" />
+    <meta property="og:image:height" content="627" />
+    <meta property="og:image:alt" content="CARBINE forest carbon scenario explorer" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CARBINE | Forest Carbon Scenario Explorer" />
+    <meta name="twitter:description" content="Explore forest carbon and management scenarios using the USDA Forest Service Forest Vegetation Simulator." />
+    <meta name="twitter:image" content="https://carbine.forestenterprise.org/carbine-header.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>CARBINE</title>
+    <title>CARBINE | Forest Carbon Scenario Explorer Powered by FVS</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "CARBINE",
+        "url": "https://carbine.forestenterprise.org/",
+        "description": "A browser-based forest carbon scenario explorer powered by the USDA Forest Service Forest Vegetation Simulator.",
+        "applicationCategory": "ScienceApplication",
+        "operatingSystem": "Web browser",
+        "isAccessibleForFree": true,
+        "creator": {
+          "@type": "Person",
+          "name": "Dr. Steven Bick",
+          "email": "steve@northeastforests.com",
+          "sameAs": [
+            "https://www.northeastforests.com",
+            "https://www.forestenterprise.org",
+            "https://www.loggingchance.com"
+          ]
+        },
+        "featureList": [
+          "Forest inventory CSV import",
+          "Official Forest Vegetation Simulator scenario runs",
+          "Forest carbon estimates in US short tons of carbon per acre",
+          "Management scenario comparison",
+          "Diagnostic and report exports"
+        ]
+      }
+    </script>
   </head>
   <body>
     <script>
@@ -30,7 +82,11 @@
       });
     </script>
     <div id="root">
-      <div style="font: 18px system-ui; padding: 24px; color: #111;">Loading CARBINE...</div>
+      <main style="font: 18px system-ui; max-width: 760px; padding: 24px; color: #17231d;">
+        <h1>CARBINE Forest Carbon Scenario Explorer</h1>
+        <p>Explore forest carbon and management scenarios using the calculation strength of the USDA Forest Service Forest Vegetation Simulator.</p>
+        <p>CARBINE helps foresters, landowners, agencies, educators, and forest-based businesses compare carbon estimates, stand conditions, and management alternatives.</p>
+      </main>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

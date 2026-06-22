@@ -1,0 +1,17 @@
+{
+  "name": "CARBINE Forest Carbon Scenario Explorer",
+  "short_name": "CARBINE",
+  "description": "Explore forest carbon and management scenarios using the USDA Forest Service Forest Vegetation Simulator.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ea",
+  "theme_color": "#143d2d",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
