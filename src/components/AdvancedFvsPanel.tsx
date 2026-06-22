@@ -83,12 +83,12 @@ export function AdvancedFvsPanel({
       <div className="diagnostics-share-note">
         <div>
           <strong>Want to help improve CARBINE?</strong>
-          <span> Share your diagnostics with the CARBINE team at steve@northeastforests.com.</span>
+          <span> Click below to create and share diagnostics directly with the CARBINE team at steve@northeastforests.com. You do not need to use Export diagnostics first.</span>
         </div>
         <button type="button" className="secondary" disabled={!canExport} onClick={() => void shareDiagnostics()}>
-          <Send size={18} /> Share diagnostics with CARBINE team
+          <Send size={18} /> Create &amp; share diagnostics
         </button>
-        <small>On supported devices, the diagnostics file is attached to your share menu. Otherwise, CARBINE downloads it and opens a pre-addressed email draft.</small>
+        <small>Use Export diagnostics above to save a copy only. This button creates the file for you and, on supported devices, attaches it to your share menu. Otherwise, CARBINE downloads it and opens a pre-addressed email draft.</small>
       </div>
       {showsRunSnapshot && (
         <p className="note">
