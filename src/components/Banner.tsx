@@ -6,7 +6,17 @@ export function Banner({ runtimeLabel }: { runtimeLabel: string }) {
   if (useHeaderImage) {
     return (
       <header className="banner banner-image-header">
-        <img className="banner-image" src="./carbine-header.png" alt="CARBINE. Forest carbon insights need exploring." onError={() => setUseHeaderImage(false)} />
+        <picture>
+          <source srcSet="./carbine-header.jpg" type="image/jpeg" />
+          <img
+            className="banner-image"
+            src="./carbine-header.png"
+            alt="CARBINE. Forest carbon insights need exploring."
+            fetchPriority="high"
+            decoding="async"
+            onError={() => setUseHeaderImage(false)}
+          />
+        </picture>
         <strong className="runtime-badge image-runtime-badge">{runtimeLabel}</strong>
       </header>
     );

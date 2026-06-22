@@ -5,6 +5,12 @@ export interface FvsVariant {
   notes: string;
 }
 
+export const verifiedVariantCodes = ["NE"] as const;
+
+export function isVerifiedVariant(code: string): boolean {
+  return verifiedVariantCodes.includes(code.trim().toUpperCase() as (typeof verifiedVariantCodes)[number]);
+}
+
 export const variantCatalog: FvsVariant[] = [
   {
     code: "AK",

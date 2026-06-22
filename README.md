@@ -2,7 +2,10 @@
 
 Because forest carbon insights need exploring.
 
-CARBINE is a browser-based forest carbon scenario explorer designed around the USDA Forest Service Forest Vegetation Simulator (FVS). The tester product target is a hosted web app: testers open a URL, and CARBINE sends runs to a hosted official-FVS API.
+CARBINE is a browser-based forest carbon scenario explorer designed around the USDA Forest Service Forest Vegetation Simulator (FVS). The public testing build sends runs to a hosted API that executes compiled official FVS variants.
+
+- Public app: https://carbine.forestenterprise.org
+- Hosted FVS API health: https://carbine-api.forestenterprise.org/health
 
 ## Commands
 
@@ -36,21 +39,11 @@ With the bridge running, verify the official smoke path:
 npm.cmd run smoke:official
 ```
 
-If the launcher does not work, run two terminals manually:
-
-```bat
-cd "C:\path\to\files-mentioned-by-the-user-carbine"
-npm.cmd run fvs:bridge
-```
-
-```bat
-cd "C:\path\to\files-mentioned-by-the-user-carbine"
-npm.cmd run dev:live -- --host 127.0.0.1 --port 5174 --force
-```
+These local commands are for development only. Public testers do not need a command prompt, local FVS installation, or bridge.
 
 ## Official FVS Source Path
 
-The public CARBINE target is the official USDA Forest Service FVS source compiled into a browser-runnable runtime, not a substitute carbon model.
+CARBINE uses compiled official USDA Forest Service FVS source through the hosted API, not a substitute carbon model.
 
 This environment could not fetch GitHub from the shell, so place the official source here manually:
 
@@ -83,27 +76,27 @@ Once the official source is present, inspect the full official variant list:
 npm.cmd run fvs:variants
 ```
 
-The next spike is compiling the official variant set and then attempting a WASM/WASI browser runtime:
+Compile the official variant set with:
 
 ```cmd
 set PATH=C:\msys64\ucrt64\bin;%PATH%
 npm.cmd run fvs:build:all
 ```
 
-`fvs:build:ne` remains only as a narrow troubleshooting command. It is not the CARBINE product target.
+`fvs:build:ne` remains only as a narrow troubleshooting command. The public testing UI currently enables only the NE variant because CARBINE's tree-file defaults and species handling have not yet been verified for the other compiled variants.
 
 ## Runtime Position
 
-FVS remains the intended authoritative calculation engine. The included `FvsMockAdapter` is for interface development only and must not be represented as real FVS output. The current outside-testing path uses the local official source bridge and parses official FVS `FMIN` / `CARBREPT` carbon output. See `docs/user-guide.md` for tester workflow and `docs/fvs-build-notes.md` for the runtime feasibility spike record.
+FVS remains the authoritative calculation engine. The included `FvsMockAdapter` is for interface development only and must not be represented as real FVS output. The public testing path uses the hosted official-FVS API and parses official FVS `FMIN` / `CARBREPT` output configured for US short tons of carbon per acre. See `docs/user-guide.md` for tester workflow and `docs/fvs-build-notes.md` for the runtime feasibility record.
 
 ## Web Deployment
 
 The app is built as static assets suitable for GitHub Pages. Static hosting cannot execute native FVS binaries, so a tester-ready deployment must also provide a hosted CARBINE FVS API with the same `/health` and `/run` contract as the local bridge.
 
-Set this GitHub repository variable before publishing a tester build:
+The deployed GitHub repository uses this build variable:
 
 ```text
-VITE_CARBINE_FVS_API_URL=https://your-carbine-fvs-api.example.com
+VITE_CARBINE_FVS_API_URL=https://carbine-api.forestenterprise.org
 ```
 
 When that value is present at build time, the Run screen defaults to Hosted FVS API and testers do not need a command prompt, local FVS install, or bridge.

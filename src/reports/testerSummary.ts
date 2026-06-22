@@ -22,6 +22,7 @@ export function buildTesterSummary(request: CarbineRunRequest, results?: Carbine
     `Basal area: ${inventory.basalAreaFt2PerAcre.toFixed(1)} ft2/ac`,
     `Projection: ${request.project.inventoryYear} plus ${request.project.projectionYears} years`,
     `Cycle length: ${request.project.cycleLengthYears ?? 5} years`,
+    "Carbon units: US short tons of carbon per acre",
     "",
     "Scenarios",
     "---------",
@@ -114,7 +115,7 @@ function formatWarnings(series: CarbonResultSeries[]): string[] {
 }
 
 function formatCarbon(value: number | undefined): string {
-  return value === undefined ? "not parsed" : `${value.toFixed(1)} tons C`;
+  return value === undefined ? "not parsed" : `${value.toFixed(1)} short tons C/acre`;
 }
 
 function formatNumber(value: number | undefined, digits: number): string {

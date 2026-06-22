@@ -1,5 +1,5 @@
 import type { StandProject } from "../domain/inventorySchema";
-import { suggestVariantForState, variantCatalog } from "../fvs/variantCatalog";
+import { isVerifiedVariant, suggestVariantForState, variantCatalog } from "../fvs/variantCatalog";
 
 export function VariantPicker({
   project,
@@ -19,18 +19,18 @@ export function VariantPicker({
       <div className="variant-row">
         <select value={project.fvsVariant} onChange={(event) => onProjectChange({ ...project, fvsVariant: event.target.value })}>
           {variantCatalog.map((variant) => (
-            <option key={variant.code} value={variant.code}>
-              {variant.code} - {variant.name}
+            <option key={variant.code} value={variant.code} disabled={!isVerifiedVariant(variant.code)}>
+              {variant.code} - {variant.name}{isVerifiedVariant(variant.code) ? "" : " (not yet verified)"}
             </option>
           ))}
         </select>
-        {suggestion && suggestion.code !== project.fvsVariant && (
+        {suggestion && isVerifiedVariant(suggestion.code) && suggestion.code !== project.fvsVariant && (
           <button type="button" className="secondary" onClick={() => onProjectChange({ ...project, fvsVariant: suggestion.code })}>
             Use suggested {suggestion.code}
           </button>
         )}
       </div>
-      <p className="quiet">Variant catalog entries are placeholders until official FVS documentation is reviewed for the selected runtime.</p>
+      <p className="quiet">Only NE is enabled in this testing build. Other official executables may be installed on the server, but CARBINE's tree-file defaults and species handling have not yet been verified for those variants.</p>
     </section>
   );
 }

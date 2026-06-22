@@ -68,9 +68,6 @@ export class FvsOfficialSourceAdapter implements FvsAdapter {
     if (!info.isRealFvs) {
       messages.push({ severity: "error", message: `${info.label}: ${info.notes.join(" ")}` });
     }
-    if (request.fvs.variant.toUpperCase() !== "NE") {
-      messages.push({ severity: "warning", message: "Current CARBINE tree-file writer is verified only for the NE variant sample path." });
-    }
     return { ok: messages.every((message) => message.severity !== "error"), messages };
   }
 

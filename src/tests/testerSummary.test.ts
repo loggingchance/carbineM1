@@ -39,7 +39,7 @@ const results: CarbineScenarioResults = {
     {
       scenarioId: "baseline",
       scenarioName: "No treatment",
-      units: "tons_carbon",
+      units: "short_tons_carbon_per_acre",
       points: [
         { year: 2026, selectedPoolTotalCarbonTons: 10, liveTreeCarbonTons: 8, totalVolumeCuFt: 100 },
         { year: 2036, selectedPoolTotalCarbonTons: 12, liveTreeCarbonTons: 9, totalVolumeCuFt: 120 }
@@ -52,7 +52,7 @@ const results: CarbineScenarioResults = {
     {
       scenarioId: "thin-2036",
       scenarioName: "Thin 20% BA in 2036 DBH >= 6 in",
-      units: "tons_carbon",
+      units: "short_tons_carbon_per_acre",
       points: [
         { year: 2026, selectedPoolTotalCarbonTons: 10, liveTreeCarbonTons: 8, totalVolumeCuFt: 100 },
         { year: 2036, selectedPoolTotalCarbonTons: 11, liveTreeCarbonTons: 7.5, harvestedCarbonTons: 1.2, totalVolumeCuFt: 90 }
@@ -70,7 +70,7 @@ describe("buildTesterSummary", () => {
     const summary = buildTesterSummary(request, results);
 
     expect(summary).toContain("Runtime: Real official FVS output");
-    expect(summary).toContain("Final carbon pool shown: 11.0 tons C");
+    expect(summary).toContain("Final carbon pool shown: 11.0 short tons C/acre");
     expect(summary).toContain("Treatment Effects vs Baseline");
     expect(summary).toContain("carbon pool shown -1.0");
     expect(summary).toContain("No treatment: baseline warning");

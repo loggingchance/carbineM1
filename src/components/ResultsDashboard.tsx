@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { BarChart3 } from "lucide-react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import {
@@ -55,6 +55,8 @@ export function ResultsDashboard({
     1,
     ...results.series.flatMap((series) => series.points.map((point) => getCarbonPoolValue(point, carbonPoolShown) ?? 0))
   );
+  const chartMaximum = niceChartMaximum(maxValue * 1.1);
+  const chartTicks = [chartMaximum, chartMaximum * 0.75, chartMaximum * 0.5, chartMaximum * 0.25, 0];
   const summaries = results.series.map((series) => {
     const carbonPoints = series.points.filter((point) => getCarbonPoolValue(point, carbonPoolShown) !== undefined);
     const firstPoint = carbonPoints[0] ?? series.points[0];
@@ -108,22 +110,57 @@ export function ResultsDashboard({
         </label>
         <p className="quiet">{carbonPoolHelp}</p>
       </div>
-      <div className="chart" aria-label={`${carbonPoolLabels[carbonPoolShown]} chart`}>
-        <div className="chart-y-label">Carbon stock (tons C/ac)</div>
-        {results.series.map((series) => (
-          <div className="chart-row" key={series.scenarioId}>
-            <span>{series.scenarioName}</span>
-            <div>
-              {series.points.map((point) => (
-                <i
-                  key={`${series.scenarioId}-${point.year}`}
-                  title={`${point.year}: ${formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)} tons C/ac`}
-                  style={{ height: `${Math.max(6, ((getCarbonPoolValue(point, carbonPoolShown) ?? 0) / maxValue) * 100)}%` }}
-                />
-              ))}
+      <p className="quiet"><strong>Carbon units:</strong> US short tons of carbon per acre.</p>
+      <div className="chart" aria-label={`${carbonPoolLabels[carbonPoolShown]} comparison chart`}>
+        <div className="chart-y-label">Carbon stock (short tons C/acre)</div>
+        {results.series.map((series, seriesIndex) => {
+          const seriesColor = scenarioColors[seriesIndex % scenarioColors.length];
+          const finalPointIndex = series.points.length - 1;
+          return (
+            <div
+              className="chart-series"
+              key={series.scenarioId}
+              style={{ borderTopColor: seriesColor, "--point-count": series.points.length } as CSSProperties}
+            >
+              <div className="chart-series-heading">
+                <span className="chart-swatch" style={{ backgroundColor: seriesColor }} aria-hidden="true" />
+                <strong>{series.scenarioName}</strong>
+              </div>
+              <div className="chart-plot">
+                <div className="chart-plot-body">
+                  {chartTicks.map((tick) => (
+                    <div className="chart-gridline" key={tick} style={{ bottom: `${(tick / chartMaximum) * 100}%` }}>
+                      <span>{formatNumber(tick, 0)}</span>
+                    </div>
+                  ))}
+                  <div className="chart-bars">
+                    {series.points.map((point, pointIndex) => {
+                      const value = getCarbonPoolValue(point, carbonPoolShown);
+                      const barHeight = value === undefined ? 0 : (value / chartMaximum) * 100;
+                      return (
+                        <div className="chart-bar-column" key={`${series.scenarioId}-${point.year}`}>
+                          {pointIndex === finalPointIndex && value !== undefined && (
+                            <span className="chart-end-value" style={{ bottom: `${barHeight}%` }}>{formatNumber(value, 1)}</span>
+                          )}
+                          <span
+                            className="chart-bar"
+                            role="img"
+                            aria-label={`${series.scenarioName}, ${point.year}: ${formatNumber(value, 1)} short tons C/acre`}
+                            title={`${point.year}: ${formatNumber(value, 1)} short tons C/acre`}
+                            style={{ height: `${barHeight}%`, backgroundColor: seriesColor }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="chart-years">
+                  {series.points.map((point) => <small key={`${series.scenarioId}-${point.year}-label`}>{point.year}</small>)}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div className="chart-x-label">Projection year</div>
       </div>
       <div className="result-summary-grid" aria-label="Scenario result summary">
@@ -271,7 +308,7 @@ function formatNumber(value: number | undefined, digits: number): string {
 }
 
 function formatCarbon(value: number | undefined): string {
-  return value === undefined ? "" : `${value.toFixed(1)} tons C`;
+  return value === undefined ? "" : `${value.toFixed(1)} short tons C/acre`;
 }
 
 function formatDelta(start: number | undefined, end: number | undefined, digits: number): string {
@@ -289,4 +326,13 @@ function formatSignedDelta(value: number | undefined, baseline: number | undefin
 function formatSignedNumber(value: number | undefined, digits: number): string {
   if (value === undefined) return "";
   return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
+}
+
+const scenarioColors = ["#1f5a44", "#c6a348", "#5c6f82", "#8a5a44", "#6f7f4b"];
+
+function niceChartMaximum(value: number): number {
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+  const rounded = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  return rounded * magnitude;
 }

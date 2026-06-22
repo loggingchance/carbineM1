@@ -1,7 +1,7 @@
 import type { CarbonResultSeries } from "../domain/carbonResults";
 
 export function parseSimpleCarbonCsv(csv: string, scenarioId: string, scenarioName: string): CarbonResultSeries {
-  const lines = csv.trim().split(/\r?\n/);
+  const lines = csv.split(/\r?\n/);
   const headers = lines[0]?.split(",").map((header) => header.trim()) ?? [];
   const warnings: string[] = [];
 
@@ -11,24 +11,29 @@ export function parseSimpleCarbonCsv(csv: string, scenarioId: string, scenarioNa
     }
   }
 
-  const points = lines.slice(1).map((line) => {
-    const values = line.split(",");
-    const row = Object.fromEntries(headers.map((header, index) => [header, Number(values[index])]));
-    return {
-      year: row.year,
+  const points = lines.slice(1).flatMap((line, index) => {
+    if (!line.trim()) return [];
+    const values = line.split(",").map((value) => value.trim());
+    const row = Object.fromEntries(headers.map((header, columnIndex) => [header, numericValue(values[columnIndex])]));
+    if (![row.year, row.live_tree_carbon_tons, row.selected_pool_total_carbon_tons].every(Number.isFinite)) {
+      warnings.push(`Skipped invalid carbon CSV row ${index + 2}; year and required carbon values must be numeric.`);
+      return [];
+    }
+    return [{
+      year: row.year as number,
       liveTreeCarbonTons: row.live_tree_carbon_tons,
       standingDeadCarbonTons: row.standing_dead_carbon_tons,
       downDeadWoodCarbonTons: row.down_dead_wood_carbon_tons,
       biomassCarbonTons: row.biomass_carbon_tons,
       harvestedCarbonTons: row.harvested_carbon_tons,
       selectedPoolTotalCarbonTons: row.selected_pool_total_carbon_tons
-    };
+    }];
   });
 
   return {
     scenarioId,
     scenarioName,
-    units: "tons_carbon",
+    units: "short_tons_carbon_per_acre",
     points,
     includedPools: ["live_tree", "standing_dead", "down_dead_wood", "biomass", "harvested"],
     excludedPools: ["soil_carbon"],
@@ -37,19 +42,29 @@ export function parseSimpleCarbonCsv(csv: string, scenarioId: string, scenarioNa
   };
 }
 
+function numericValue(value: string | undefined): number | undefined {
+  if (value === undefined || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export function parseFvsSummaryOutput(text: string, scenarioId: string, scenarioName: string, sourceFiles: string[] = []): CarbonResultSeries {
   const summaryPoints = text
     .split(/\r?\n/)
     .map((line) => parseSummaryLine(line))
     .filter((point): point is NonNullable<ReturnType<typeof parseSummaryLine>> => Boolean(point));
-  const carbonPoints = uniquePointsByYear(parseStandCarbonReport(text));
+  const carbonReportPresent = text.includes("STAND CARBON REPORT");
+  const carbonReportUnits = detectCarbonReportUnits(text);
+  const carbonPoints = carbonReportUnits === "short_tons_per_acre"
+    ? uniquePointsByYear(parseStandCarbonReport(text))
+    : [];
   const points = mergeCarbonAndSummaryPoints(carbonPoints, summaryPoints);
   const hasCarbon = carbonPoints.length > 0;
 
   return {
     scenarioId,
     scenarioName,
-    units: "tons_carbon",
+    units: "short_tons_carbon_per_acre",
     points,
     includedPools: hasCarbon
       ? ["aboveground_live", "belowground_live", "standing_dead", "down_dead_wood", "forest_floor", "shrub_herb", "removed_carbon"]
@@ -57,9 +72,17 @@ export function parseFvsSummaryOutput(text: string, scenarioId: string, scenario
     excludedPools: hasCarbon ? ["soil_carbon"] : ["soil_carbon", "unverified_carbon_tables"],
     fvsSourceFiles: sourceFiles,
     parserWarnings: hasCarbon
-      ? ["Official FVS stand carbon report parsed from FMIN/CARBREPT output. Review FVS carbon settings and units before relying on results."]
-      : ["Official FVS executable ran and CARBINE parsed FVS summary volume rows. Carbon-specific output was not found, so carbon fields remain blank."]
+      ? ["Official FVS stand carbon report parsed from FMIN/CARBREPT output configured for US short tons of carbon per acre."]
+      : carbonReportPresent
+        ? [`FVS produced a carbon report with ${carbonReportUnits === "metric" ? "metric" : "unrecognized"} units. CARBINE only accepts reports explicitly declared as US short tons per acre, so carbon fields remain blank.`]
+        : ["Official FVS executable ran and CARBINE parsed FVS summary volume rows. Carbon-specific output was not found, so carbon fields remain blank."]
   };
+}
+
+function detectCarbonReportUnits(text: string): "short_tons_per_acre" | "metric" | "unknown" {
+  if (/ALL VARIABLES ARE REPORTED IN METRIC TONS/i.test(text)) return "metric";
+  if (/ALL VARIABLES ARE REPORTED IN TONS\/ACRE/i.test(text)) return "short_tons_per_acre";
+  return "unknown";
 }
 
 function parseStandCarbonReport(text: string) {

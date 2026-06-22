@@ -14,7 +14,7 @@ export const carbonPoolLabels: Record<CarbonPoolKey, string> = {
   down_dead_wood: "Down dead wood carbon",
   aboveground_total: "Total aboveground carbon",
   harvested: "Harvested/removal carbon",
-  total: "Total modeled carbon"
+  total: "Total estimated carbon"
 };
 
 export const carbonPoolHelp =

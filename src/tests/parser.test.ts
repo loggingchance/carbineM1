@@ -11,7 +11,18 @@ describe("parseSimpleCarbonCsv", () => {
     );
     expect(parsed.points).toHaveLength(2);
     expect(parsed.points[1].selectedPoolTotalCarbonTons).toBe(17);
+    expect(parsed.units).toBe("short_tons_carbon_per_acre");
     expect(parsed.excludedPools).toContain("soil_carbon");
+  });
+
+  it("skips blank and malformed carbon CSV rows", () => {
+    const parsed = parseSimpleCarbonCsv(
+      "year,live_tree_carbon_tons,selected_pool_total_carbon_tons\n2026,10,14\n\nnot-a-year,12,17\n2036,13,18\n",
+      "baseline",
+      "No treatment"
+    );
+    expect(parsed.points.map((point) => point.year)).toEqual([2026, 2036]);
+    expect(parsed.parserWarnings).toContain("Skipped invalid carbon CSV row 4; year and required carbon values must be numeric.");
   });
 });
 
@@ -21,7 +32,7 @@ describe("official FVS run-set guardrails", () => {
       {
         scenarioId: "baseline",
         scenarioName: "No treatment",
-        units: "tons_carbon" as const,
+        units: "short_tons_carbon_per_acre" as const,
         points: [{ year: 2026, selectedPoolTotalCarbonTons: 15.6, liveTreeCarbonTons: 4.7 }],
         includedPools: [],
         excludedPools: [],
@@ -31,7 +42,7 @@ describe("official FVS run-set guardrails", () => {
       {
         scenarioId: "thin-2036",
         scenarioName: "Thin 25% BA in 2036",
-        units: "tons_carbon" as const,
+        units: "short_tons_carbon_per_acre" as const,
         points: [{ year: 2026, selectedPoolTotalCarbonTons: 13.5, liveTreeCarbonTons: 1.0 }],
         includedPools: [],
         excludedPools: [],
@@ -85,6 +96,7 @@ describe("parseFvsSummaryOutput", () => {
     const parsed = parseFvsSummaryOutput(
       [
         "                         STAND CARBON REPORT (BASED ON STOCKABLE AREA)",
+        "                         ALL VARIABLES ARE REPORTED IN TONS/ACRE",
         "YEAR    Total    Merch     Live     Dead     Dead      DDW    Floor  Shb/Hrb   Carbon   Carbon  from Fire",
         "2026      9.0      4.0      2.0     -1.0      1.0      0.5      3.0      0.2     15.7      0.1      0.0",
         "2026  60     0   0    0   0  61 11.6     5     5     3    17     0     0     0     0     0   0    0   0  61 11.6      10    0     0     0.1 999 55"
@@ -104,6 +116,7 @@ describe("parseFvsSummaryOutput", () => {
     const parsed = parseFvsSummaryOutput(
       [
         "                         STAND CARBON REPORT (BASED ON STOCKABLE AREA)",
+        "                         ALL VARIABLES ARE REPORTED IN TONS/ACRE",
         "YEAR    Total    Merch     Live     Dead     Dead      DDW    Floor  Shb/Hrb   Carbon   Carbon  from Fire",
         "2026      9.0      4.0      2.0      0.0      1.0      0.5      3.0      0.2     15.7      0.1      0.0",
         "2026  60     0   0    0   0  61 11.6     5     5     3    17     0     0     0     0     0   0    0   0  61 11.6      10    0     0     0.1 999 55",
@@ -118,6 +131,21 @@ describe("parseFvsSummaryOutput", () => {
     expect(parsed.points[1].year).toBe(2036);
     expect(parsed.points[1].totalVolumeCuFt).toBe(8);
     expect(parsed.points[1].selectedPoolTotalCarbonTons).toBeUndefined();
+  });
+
+  it("refuses to parse metric FVS carbon output as short tons per acre", () => {
+    const parsed = parseFvsSummaryOutput(
+      [
+        "STAND CARBON REPORT (BASED ON STOCKABLE AREA)",
+        "ALL VARIABLES ARE REPORTED IN METRIC TONS/HA",
+        "2026      9.0      4.0      2.0      0.0      1.0      0.5      3.0      0.2     15.7      0.1      0.0"
+      ].join("\n"),
+      "baseline",
+      "No treatment"
+    );
+
+    expect(parsed.points).toHaveLength(0);
+    expect(parsed.parserWarnings[0]).toContain("metric units");
   });
 
   it("deduplicates summary rows that appear in both input.out and input.sum", () => {

@@ -53,7 +53,7 @@ export function buildHtmlReport(request: CarbineRunRequest, results: CarbineScen
   <h1>CARBINE</h1>
   <p><em>Because forest carbon insights need exploring.</em></p>
   <p>Project: ${escapeHtml(request.project.projectName)}<br>Stand: ${escapeHtml(request.project.standName)}<br>Report date: ${new Date().toLocaleDateString()}</p>
-  <p>Projection length: ${request.project.projectionYears} years<br>Cycle length: ${request.project.cycleLengthYears ?? 5} years<br>Carbon pool shown: ${carbonPoolLabels[reportPool]}<br>Chart units: Carbon stock (tons C/ac) by projection year</p>
+  <p>Projection length: ${request.project.projectionYears} years<br>Cycle length: ${request.project.cycleLengthYears ?? 5} years<br>Carbon pool shown: ${carbonPoolLabels[reportPool]}<br>Carbon units: US short tons of carbon per acre</p>
   <p>CARBINE is independently developed and is not an official USDA Forest Service product. It is powered by the USDA Forest Service Forest Vegetation Simulator.</p>
   <p>CARBINE is designed for short-term forest carbon scenario exploration. Results are intended to help compare management choices and carbon trajectories, not to replace a calibrated FVS analysis or a full silvicultural prescription.</p>
   ${warning}
@@ -62,6 +62,7 @@ export function buildHtmlReport(request: CarbineRunRequest, results: CarbineScen
   <h2>Scenario Settings</h2>
   ${buildScenarioSettingsTable(request)}
   <h2>${resultHeading}</h2>
+  <p>All carbon columns in this report are US short tons of carbon per acre.</p>
   ${scenarioSummary}
   ${recoverySummary}
   ${treatmentEffects}

@@ -17,7 +17,7 @@ export interface CarbonResultPoint {
 export interface CarbonResultSeries {
   scenarioId: string;
   scenarioName: string;
-  units: "tons_carbon" | "metric_tons_carbon" | "tons_co2e" | "metric_tons_co2e";
+  units: "short_tons_carbon_per_acre";
   points: CarbonResultPoint[];
   includedPools: string[];
   excludedPools: string[];

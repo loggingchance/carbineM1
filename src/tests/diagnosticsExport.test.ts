@@ -39,7 +39,7 @@ const results: CarbineScenarioResults = {
     {
       scenarioId: "baseline",
       scenarioName: "No treatment",
-      units: "tons_carbon",
+      units: "short_tons_carbon_per_acre",
       points: [
         { year: 2026, selectedPoolTotalCarbonTons: 10, liveTreeCarbonTons: 8 },
         { year: 2036, selectedPoolTotalCarbonTons: 12, liveTreeCarbonTons: 9 }
@@ -52,7 +52,7 @@ const results: CarbineScenarioResults = {
     {
       scenarioId: "thin-2035",
       scenarioName: "Thin 20% BA in 2036 DBH >= 6 in",
-      units: "tons_carbon",
+      units: "short_tons_carbon_per_acre",
       points: [
         { year: 2026, selectedPoolTotalCarbonTons: 10, liveTreeCarbonTons: 8 },
         { year: 2036, selectedPoolTotalCarbonTons: 11, liveTreeCarbonTons: 7.5, harvestedCarbonTons: 1.2 }

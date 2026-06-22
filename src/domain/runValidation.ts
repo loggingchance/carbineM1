@@ -1,6 +1,7 @@
 import type { CarbineRunRequest } from "./fvsRunRequest";
 import type { ScenarioDefinition } from "./scenarioSchema";
 import type { ValidationMessage, ValidationResult } from "./validation";
+import { isVerifiedVariant } from "../fvs/variantCatalog";
 
 export function validateRunRequest(request: CarbineRunRequest): ValidationResult {
   const messages: ValidationMessage[] = [];
@@ -11,6 +12,10 @@ export function validateRunRequest(request: CarbineRunRequest): ValidationResult
 
   if (request.scenarios.length === 0) {
     messages.push({ severity: "error", message: "Add at least one scenario before running." });
+  }
+
+  if (!isVerifiedVariant(request.fvs.variant)) {
+    messages.push({ severity: "error", message: `FVS variant ${request.fvs.variant} is not yet verified for CARBINE runs. Select NE for this testing build.` });
   }
 
   if (!request.scenarios.some((scenario) => scenario.type === "baseline")) {

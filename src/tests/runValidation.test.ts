@@ -67,4 +67,11 @@ describe("validateRunRequest", () => {
     expect(validation.messages.some((message) => message.message.includes("no-treatment baseline"))).toBe(true);
     expect(validation.messages.some((message) => message.message.includes("removes 85% BA"))).toBe(true);
   });
+
+  it("blocks variants that are not yet verified", () => {
+    const validation = validateRunRequest({ ...request, fvs: { ...request.fvs, variant: "CA" } });
+
+    expect(validation.ok).toBe(false);
+    expect(validation.messages.some((message) => message.message.includes("not yet verified"))).toBe(true);
+  });
 });

@@ -81,7 +81,7 @@ export class FvsMockAdapter implements FvsAdapter {
       parsedCarbon: {
         scenarioId,
         scenarioName: scenarioDisplayName(scenario),
-        units: "tons_carbon",
+        units: "short_tons_carbon_per_acre",
         points,
         includedPools: ["live_tree", "standing_dead", "down_dead_wood", "biomass", "harvested"],
         excludedPools: ["soil_carbon"],

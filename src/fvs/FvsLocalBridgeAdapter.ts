@@ -86,7 +86,7 @@ export class FvsLocalBridgeAdapter implements FvsAdapter {
       parsedCarbon: {
         scenarioId,
         scenarioName: scenarioDisplayName(scenario),
-        units: "tons_carbon",
+        units: "short_tons_carbon_per_acre",
         points: [],
         includedPools: [],
         excludedPools: ["soil_carbon"],
