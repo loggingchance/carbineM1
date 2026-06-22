@@ -1,7 +1,8 @@
-import { Download } from "lucide-react";
+import { Download, Send } from "lucide-react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
 import { buildDiagnosticsExport } from "../reports/diagnosticsExport";
+import { carbineBuildId } from "../config/buildInfo";
 
 export function AdvancedFvsPanel({
   request,
@@ -19,15 +20,50 @@ export function AdvancedFvsPanel({
   const currentScenarioCount = currentRequest?.scenarios.length ?? request.scenarios.length;
   const showsRunSnapshot = Boolean(results && currentRequest && currentScenarioCount !== request.scenarios.length);
 
-  function downloadDiagnostics() {
+  function createDiagnosticsFile() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const body = buildDiagnosticsExport(request, results, rawPreview, currentRequest);
-    const url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
+    return new File([body], `carbine-diagnostics-${timestamp}.json`, { type: "application/json" });
+  }
+
+  function downloadFile(file: File) {
+    const url = URL.createObjectURL(file);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `carbine-diagnostics-${timestamp}.json`;
+    link.download = file.name;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  function downloadDiagnostics() {
+    downloadFile(createDiagnosticsFile());
+  }
+
+  async function shareDiagnostics() {
+    const file = createDiagnosticsFile();
+    const shareData = {
+      title: `CARBINE diagnostics - build ${carbineBuildId}`,
+      text: "CARBINE diagnostics for review by the CARBINE team.",
+      files: [file]
+    };
+
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+
+    openDiagnosticsEmailFallback(file);
+  }
+
+  function openDiagnosticsEmailFallback(file: File) {
+    downloadFile(file);
+    const subject = encodeURIComponent(`CARBINE diagnostics - build ${carbineBuildId}`);
+    const body = encodeURIComponent(`Please find my CARBINE diagnostics attached.\n\nDownloaded file: ${file.name}\nCARBINE build: ${carbineBuildId}`);
+    window.location.href = `mailto:steve@northeastforests.com?subject=${subject}&body=${body}`;
   }
 
   return (
@@ -44,12 +80,23 @@ export function AdvancedFvsPanel({
       <p className="quiet">
         Export diagnostics includes the request, parsed results, generated FVS keyword files, tree file, run log, and raw FVS outputs.
       </p>
+      <div className="diagnostics-share-note">
+        <div>
+          <strong>Want to help improve CARBINE?</strong>
+          <span> Share your diagnostics with the CARBINE team at steve@northeastforests.com.</span>
+        </div>
+        <button type="button" className="secondary" disabled={!canExport} onClick={() => void shareDiagnostics()}>
+          <Send size={18} /> Share diagnostics with CARBINE team
+        </button>
+        <small>On supported devices, the diagnostics file is attached to your share menu. Otherwise, CARBINE downloads it and opens a pre-addressed email draft.</small>
+      </div>
       {showsRunSnapshot && (
         <p className="note">
           Showing the last completed run. Current scenario setup has {currentScenarioCount} scenarios; run again before exporting a new test package.
         </p>
       )}
       <dl className="details">
+        <div><dt>CARBINE build</dt><dd>{carbineBuildId}</dd></div>
         <div><dt>Variant</dt><dd>{request.fvs.variant}</dd></div>
         <div><dt>Carbon extension</dt><dd>{request.fvs.extensions.carbon ? "Requested" : "Off"}</dd></div>
         <div><dt>Scenarios in this run</dt><dd>{request.scenarios.length}</dd></div>

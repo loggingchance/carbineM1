@@ -80,6 +80,8 @@ describe("buildDiagnosticsExport", () => {
     const exported = JSON.parse(buildDiagnosticsExport(request, results, "friendly preview"));
 
     expect(exported.format).toBe("carbine-diagnostics");
+    expect(exported.buildId).toBeTruthy();
+    expect(exported.summary.buildId).toBe(exported.buildId);
     expect(exported.summary.variant).toBe("NE");
     expect(exported.summary.requestMatchesCurrent).toBe(true);
     expect(exported.summary.resultsCoverRequest).toBe(true);

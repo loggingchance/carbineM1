@@ -1,5 +1,6 @@
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
+import { carbineBuildId } from "../config/buildInfo";
 
 export function buildDiagnosticsExport(
   request: CarbineRunRequest,
@@ -21,8 +22,10 @@ export function buildDiagnosticsExport(
     {
       format: "carbine-diagnostics",
       version: 1,
+      buildId: carbineBuildId,
       exportedAt: new Date().toISOString(),
       summary: {
+        buildId: carbineBuildId,
         variant: request.fvs.variant,
         scenarioCount: request.scenarios.length,
         currentScenarioCount,

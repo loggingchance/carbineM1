@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_CARBINE_FVS_API_URL?: string;
+  readonly VITE_CARBINE_BUILD_ID?: string;
 }
 
 interface ImportMeta {

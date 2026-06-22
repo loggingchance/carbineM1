@@ -311,6 +311,25 @@ button {
   background: #f8faf6;
 }
 
+.diagnostics-share-note {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem 1rem;
+  align-items: center;
+  margin: 0.9rem 0 1rem;
+  padding: 0.8rem;
+  border: 1px solid #d7ded8;
+  border-left: 4px solid #c6a348;
+  border-radius: 6px;
+  background: #f8faf6;
+  color: #30473a;
+}
+
+.diagnostics-share-note small {
+  grid-column: 1 / -1;
+  color: #66746c;
+}
+
 .wide-note {
   grid-column: 1 / -1;
 }
@@ -1142,6 +1161,10 @@ pre {
   .disclaimer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .diagnostics-share-note {
+    grid-template-columns: 1fr;
   }
 
 }
