@@ -131,8 +131,19 @@ export function InventoryUpload({
             onChange={(event) => onProjectChange({ ...project, siteSpeciesCode: Number(event.target.value) })}
           />
         </label>
+        <label>
+          FVS forest/location code
+          <input
+            type="number"
+            value={project.forestLocationCode ?? 922}
+            onChange={(event) => onProjectChange({ ...project, forestLocationCode: Number(event.target.value) })}
+          />
+        </label>
         <div className="field-note">
           <strong>Default SI in use:</strong> {project.siteIndex ?? 56} for species code {project.siteSpeciesCode ?? 13}. Change this before running if your stand uses a different FVS site index.
+        </div>
+        <div className="field-note">
+          <strong>FVS location:</strong> {project.forestLocationCode ?? 922}. This feeds the STDINFO forest/location code and should match the selected regional variant.
         </div>
         <div className="field-note wide-note">
           <strong>Inventory design:</strong> expanded trees per acre. CARBINE currently expects each tree row to include its own TPA value, writes that expansion into the FVS tree file, and uses a fixed DESIGN line for the stand run. Raw prism, fixed-area plot, and other cruise designs should be converted to tree-level TPA before upload.

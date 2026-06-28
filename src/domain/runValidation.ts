@@ -15,7 +15,11 @@ export function validateRunRequest(request: CarbineRunRequest): ValidationResult
   }
 
   if (!isVerifiedVariant(request.fvs.variant)) {
-    messages.push({ severity: "error", message: `FVS variant ${request.fvs.variant} is not yet verified for CARBINE runs. Select NE for this testing build.` });
+    messages.push({ severity: "error", message: `FVS variant ${request.fvs.variant} is not in the CARBINE variant catalog.` });
+  }
+
+  if (!Number.isFinite(request.project.forestLocationCode) || request.project.forestLocationCode <= 0) {
+    messages.push({ severity: "error", message: "Enter a valid FVS forest/location code for the selected variant." });
   }
 
   if (!request.scenarios.some((scenario) => scenario.type === "baseline")) {

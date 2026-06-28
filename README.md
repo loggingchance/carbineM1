@@ -83,7 +83,7 @@ set PATH=C:\msys64\ucrt64\bin;%PATH%
 npm.cmd run fvs:build:all
 ```
 
-`fvs:build:ne` remains only as a narrow troubleshooting command. The public testing UI currently enables only the NE variant because CARBINE's tree-file defaults and species handling have not yet been verified for the other compiled variants.
+`fvs:build:ne` remains only as a narrow troubleshooting command. The public testing UI can request any compiled official variant reported by the hosted API. Users must still review species codes, FVS forest/location code, and site index for the selected regional variant.
 
 ## Runtime Position
 

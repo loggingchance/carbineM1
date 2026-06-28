@@ -152,7 +152,7 @@ export function TesterChecklist({
 
       <div className="tester-limits">
         <strong>Known limits for this tester build:</strong>
-        <span>NE is the verified path right now.</span>
+        <span>All compiled regional variants are selectable; reviewers should confirm species codes, location code, and site index for their variant.</span>
         <span>Treatments use the current simple FVS thinning controls.</span>
         <span>Carbon is parsed from official FMIN/CARBREPT output.</span>
         <span>CARBINE is not an official USDA Forest Service product.</span>

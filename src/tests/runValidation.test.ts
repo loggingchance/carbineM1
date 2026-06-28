@@ -11,6 +11,7 @@ const request: CarbineRunRequest = {
     inventoryYear: 2026,
     projectionYears: 30,
     cycleLengthYears: 5,
+    forestLocationCode: 922,
     siteSpeciesCode: 13,
     siteIndex: 56,
     inventoryDesign: "expanded_tpa",
@@ -68,10 +69,17 @@ describe("validateRunRequest", () => {
     expect(validation.messages.some((message) => message.message.includes("removes 85% BA"))).toBe(true);
   });
 
-  it("blocks variants that are not yet verified", () => {
+  it("allows cataloged regional variants", () => {
     const validation = validateRunRequest({ ...request, fvs: { ...request.fvs, variant: "CA" } });
 
+    expect(validation.ok).toBe(true);
+    expect(validation.messages.some((message) => message.message.includes("not in the CARBINE variant catalog"))).toBe(false);
+  });
+
+  it("blocks unknown variant codes", () => {
+    const validation = validateRunRequest({ ...request, fvs: { ...request.fvs, variant: "ZZ" } });
+
     expect(validation.ok).toBe(false);
-    expect(validation.messages.some((message) => message.message.includes("not yet verified"))).toBe(true);
+    expect(validation.messages.some((message) => message.message.includes("not in the CARBINE variant catalog"))).toBe(true);
   });
 });

@@ -87,7 +87,7 @@ Send these files or notes after each test:
 
 ## Current known limits
 
-- The verified outside-test path is the NE variant.
+- The outside-test build can request any compiled official FVS regional variant reported by the hosted API. Review species codes, FVS forest/location code, and site index for the selected variant.
 - Carbon is parsed from official FVS `FMIN` / `CARBREPT` stand carbon output.
 - Soil carbon is excluded.
 - Treatments currently use simple `THINDBH` controls: treatment year, DBH min/max, and percent basal area removal.

@@ -23,6 +23,7 @@ describe("official FVS smoke path", () => {
         inventoryYear: 2026,
         projectionYears: 30,
         cycleLengthYears: 5,
+        forestLocationCode: 922,
         siteSpeciesCode: 13,
         siteIndex: 56,
         inventoryDesign: "expanded_tpa",

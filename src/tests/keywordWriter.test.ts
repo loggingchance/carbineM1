@@ -11,6 +11,7 @@ const request: CarbineRunRequest = {
     inventoryYear: 2026,
     projectionYears: 30,
     cycleLengthYears: 5,
+    forestLocationCode: 922,
     siteSpeciesCode: 13,
     siteIndex: 56,
     inventoryDesign: "expanded_tpa",
@@ -112,7 +113,29 @@ describe("writeKeywordPreview", () => {
 
     expect(key).toContain("NUMCYCLE        7.0");
     expect(key).toContain("TIMEINT         0.0       5.0");
+    expect(key).toContain("STDINFO           922");
     expect(key).toContain("SITECODE          13        56");
     expect(key).toContain("THINDBH      2036.0       6.0      18.0      0.25");
+  });
+
+  it("writes selected regional variant location defaults into the official keyword file", () => {
+    const key = writeOfficialKeywordFile(
+      {
+        ...request,
+        project: {
+          ...request.project,
+          forestLocationCode: 610,
+          siteSpeciesCode: 1,
+          siteIndex: 60,
+          location: { state: "CA" }
+        },
+        fvs: { ...request.fvs, variant: "CA" },
+        inventory: [{ ...request.inventory[0], speciesCode: "PP" }]
+      },
+      request.scenarios[0]
+    );
+
+    expect(key).toContain("STDINFO           610");
+    expect(key).toContain("SITECODE           1        60");
   });
 });

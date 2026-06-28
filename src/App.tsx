@@ -25,6 +25,7 @@ import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
 import { hasHostedFvsApi, hostedFvsApiUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
 
@@ -37,6 +38,7 @@ const initialProject: StandProject = {
   inventoryYear: 2026,
   projectionYears: 30,
   cycleLengthYears: 5,
+  forestLocationCode: 922,
   siteSpeciesCode: 13,
   siteIndex: 56,
   inventoryDesign: "expanded_tpa",
@@ -98,6 +100,7 @@ export function App() {
         inventoryYear: project.inventoryYear,
         projectionYears: project.projectionYears,
         cycleLengthYears: project.cycleLengthYears ?? 5,
+        forestLocationCode: project.forestLocationCode ?? 922,
         siteSpeciesCode: project.siteSpeciesCode ?? 13,
         siteIndex: project.siteIndex ?? 56,
         inventoryDesign: project.inventoryDesign ?? "expanded_tpa",
@@ -227,12 +230,16 @@ export function App() {
 }
 
 function normalizeProject(project: StandProject): StandProject {
+  const variant = getVariantByCode(project.fvsVariant);
   return {
     ...project,
+    fvsVariant: variant?.code ?? project.fvsVariant ?? "NE",
+    state: project.state || variant?.defaultState || "VT",
     projectionYears: [10, 20, 30].includes(project.projectionYears) ? project.projectionYears : 30,
     cycleLengthYears: project.cycleLengthYears ?? 5,
-    siteSpeciesCode: project.siteSpeciesCode ?? 13,
-    siteIndex: project.siteIndex ?? 56,
+    forestLocationCode: project.forestLocationCode ?? variant?.defaultForestLocationCode ?? 922,
+    siteSpeciesCode: project.siteSpeciesCode ?? variant?.defaultSiteSpeciesCode ?? 13,
+    siteIndex: project.siteIndex ?? variant?.defaultSiteIndex ?? 56,
     inventoryDesign: project.inventoryDesign ?? "expanded_tpa"
   };
 }

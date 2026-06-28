@@ -43,6 +43,7 @@ export function writeKeywordPreview(request: CarbineRunRequest, scenario: Scenar
     `INVYEAR ${request.project.inventoryYear}`,
     `NUMCYCLE ${cycles}`,
     `TIMEINT 0 ${cycleLength}`,
+    `STDINFO ${request.project.forestLocationCode ?? 922}`,
     `SITECODE ${request.project.siteSpeciesCode ?? 13} ${request.project.siteIndex ?? 56}`,
     `* Carbon reporting keywords are intentionally not finalized in this preview.`
   ];
@@ -93,7 +94,7 @@ export function writeOfficialKeywordFile(request: CarbineRunRequest, scenario: S
     fixedText(request.project.standName || request.project.projectName, 8, 72),
     `* Scenario: ${name}`,
     "DESIGN        -15.0       0.0",
-    "STDINFO        922.0                60.0     315.0      30.0      20.0",
+    `STDINFO    ${numberField(request.project.forestLocationCode ?? 922, 10, 0)}                60.0     315.0      30.0      20.0`,
     `SITECODE    ${numberField(request.project.siteSpeciesCode ?? 13, 8, 0)}${numberField(request.project.siteIndex ?? 56, 10, 0)}`,
     `INVYEAR       ${request.project.inventoryYear.toFixed(1)}`,
     `NUMCYCLE        ${cycles.toFixed(1)}`,
