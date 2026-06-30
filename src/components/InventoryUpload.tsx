@@ -153,7 +153,7 @@ export function InventoryUpload({
         CARBINE is designed for short-term forest carbon scenario exploration. Results help compare management choices and carbon trajectories; they do not replace a calibrated FVS analysis or a full silvicultural prescription.
       </p>
       <p className="quiet">
-        The formatted CSV template uses the required columns first: stand_id, species_code, dbh_in, and trees_per_acre.
+        The formatted CSV template puts the most important columns first. species_code, dbh_in, and trees_per_acre are required; stand_id is recommended but CARBINE can fill it in when missing.
       </p>
 
       <div

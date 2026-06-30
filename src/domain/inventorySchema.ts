@@ -42,14 +42,13 @@ export interface InventorySummary {
 }
 
 export const requiredInventoryColumns = [
-  "stand_id",
   "species_code",
   "dbh_in",
   "trees_per_acre"
 ] as const;
 
 export const inventoryColumnHelp =
-  "Needed columns: stand_id, species_code, dbh_in, and trees_per_acre. CARBINE currently expects each tree row to include expanded trees per acre; common headings like Stand, Species, DBH, and TPA are accepted.";
+  "Needed columns: species_code, dbh_in, and trees_per_acre. stand_id is recommended but optional; if it is missing, CARBINE uses a default stand label. CARBINE currently expects each tree row to include expanded trees per acre; common headings like Species, DBH, and TPA are accepted.";
 
 export function summarizeInventory(records: TreeRecord[]): InventorySummary {
   if (records.length === 0) {

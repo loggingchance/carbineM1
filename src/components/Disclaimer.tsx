@@ -1,4 +1,4 @@
-import { Coffee } from "lucide-react";
+import { Beer } from "lucide-react";
 
 export function Disclaimer() {
   return (
@@ -8,7 +8,7 @@ export function Disclaimer() {
         Users are responsible for reviewing inputs, assumptions, variant selection, and interpretation of outputs.
       </span>
       <a className="support-link" href="https://venmo.com/u/Steven-Bick-1" target="_blank" rel="noreferrer">
-        <Coffee size={17} aria-hidden="true" /> Enjoying CARBINE? Buy me a coffee
+        <Beer size={17} aria-hidden="true" /> Enjoying CARBINE? Buy me a beer
       </a>
     </footer>
   );

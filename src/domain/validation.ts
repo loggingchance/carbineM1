@@ -58,9 +58,6 @@ export function parseInventoryCsv(csv: string): { records: TreeRecord[]; validat
     const crownRatio = parseOptionalPositiveNumber(row.crown_ratio);
     const status = (row.status || "live").toLowerCase();
 
-    if (!row.stand_id) {
-      messages.push({ severity: "error", row: rowNumber, field: "stand_id", message: "stand_id is required." });
-    }
     if (!row.species_code) {
       messages.push({ severity: "error", row: rowNumber, field: "species_code", message: "species_code is required." });
     }
@@ -76,9 +73,9 @@ export function parseInventoryCsv(csv: string): { records: TreeRecord[]; validat
       messages.push({ severity: "warning", row: rowNumber, field: "status", message: `Status "${row.status}" is not one of live, dead, cut, or leave. It will be treated as live.` });
     }
 
-    if (dbhIn !== null && treesPerAcre !== null && row.stand_id && row.species_code) {
+    if (dbhIn !== null && treesPerAcre !== null && row.species_code) {
       records.push({
-        standId: row.stand_id,
+        standId: row.stand_id || "Imported stand",
         plotId: row.plot_id || undefined,
         treeId: row.tree_id || undefined,
         speciesCode: canonicalSpeciesCode(row.species_code),
@@ -92,6 +89,14 @@ export function parseInventoryCsv(csv: string): { records: TreeRecord[]; validat
       });
     }
   });
+
+  if (records.length > 0 && !headers.includes("stand_id")) {
+    messages.push({
+      severity: "info",
+      field: "stand_id",
+      message: "No stand_id column was found, so CARBINE used Imported stand as the stand label."
+    });
+  }
 
   if (records.length > 0 && records.filter((record) => record.heightFt === undefined).length / records.length > 0.5) {
     messages.push({

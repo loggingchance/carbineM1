@@ -71,9 +71,9 @@ describe("buildTesterSummary", () => {
     const summary = buildTesterSummary(request, results);
 
     expect(summary).toContain("Runtime: Real official FVS output");
-    expect(summary).toContain("Final carbon pool shown: 11.0 short tons C/acre");
+    expect(summary).toContain("Final carbon pool shown: 10.0 tonnes C/ac");
     expect(summary).toContain("Treatment Effects vs Baseline");
-    expect(summary).toContain("carbon pool shown -1.0");
+    expect(summary).toContain("carbon pool shown -0.9");
     expect(summary).toContain("No treatment: baseline warning");
     expect(summary).toContain("carbine-diagnostics*.json");
     expect(summary).toContain("CARBINE is not an official USDA Forest Service product.");

@@ -1,6 +1,13 @@
 import type { CarbonResultPoint, CarbonResultSeries, CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
 import { summarizeInventory } from "../domain/inventorySchema";
+import {
+  CARBINE_CARBON_DISPLAY_UNIT_LABEL,
+  CARBINE_CARBON_DISPLAY_UNIT_LONG,
+  CARBINE_CARBON_SOURCE_UNIT_LONG,
+  formatCarbonSignedDelta,
+  formatCarbonWithUnit
+} from "../utils/carbonUnits";
 
 export function buildTesterSummary(request: CarbineRunRequest, results?: CarbineScenarioResults): string {
   const inventory = summarizeInventory(request.inventory);
@@ -22,7 +29,7 @@ export function buildTesterSummary(request: CarbineRunRequest, results?: Carbine
     `Basal area: ${inventory.basalAreaFt2PerAcre.toFixed(1)} ft2/ac`,
     `Projection: ${request.project.inventoryYear} plus ${request.project.projectionYears} years`,
     `Cycle length: ${request.project.cycleLengthYears ?? 5} years`,
-    "Carbon units: US short tons of carbon per acre",
+    `Carbon units: ${CARBINE_CARBON_DISPLAY_UNIT_LONG} (${CARBINE_CARBON_DISPLAY_UNIT_LABEL}); FVS source output is ${CARBINE_CARBON_SOURCE_UNIT_LONG}`,
     "",
     "Scenarios",
     "---------",
@@ -102,7 +109,7 @@ function formatTreatmentEffects(series: CarbonResultSeries[]): string[] {
         ?? candidate.points[candidate.points.length - 1];
       const baselinePoint = finalPoint ? baselineByYear.get(finalPoint.year) : undefined;
       return [
-        `${candidate.scenarioName} in ${finalPoint?.year ?? "no year"}: carbon pool shown ${formatSignedDelta(finalPoint?.selectedPoolTotalCarbonTons, baselinePoint?.selectedPoolTotalCarbonTons, 1)}, live tree ${formatSignedDelta(finalPoint?.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}, volume ${formatSignedDelta(finalPoint?.totalVolumeCuFt, baselinePoint?.totalVolumeCuFt, 0)}`
+        `${candidate.scenarioName} in ${finalPoint?.year ?? "no year"}: carbon pool shown ${formatCarbonSignedDelta(finalPoint?.selectedPoolTotalCarbonTons, baselinePoint?.selectedPoolTotalCarbonTons, 1)}, live tree ${formatCarbonSignedDelta(finalPoint?.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}, volume ${formatSignedDelta(finalPoint?.totalVolumeCuFt, baselinePoint?.totalVolumeCuFt, 0)}`
       ];
     });
 
@@ -115,7 +122,7 @@ function formatWarnings(series: CarbonResultSeries[]): string[] {
 }
 
 function formatCarbon(value: number | undefined): string {
-  return value === undefined ? "not parsed" : `${value.toFixed(1)} short tons C/acre`;
+  return value === undefined ? "not parsed" : formatCarbonWithUnit(value);
 }
 
 function formatNumber(value: number | undefined, digits: number): string {

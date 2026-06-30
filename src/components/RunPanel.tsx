@@ -121,7 +121,7 @@ export function RunPanel({
       <p className={request.inventory.length > 0 ? "ready-note" : "note"}>
         {request.inventory.length > 0
           ? `Inventory ready: ${summary.recordCount} records, ${summary.speciesCount} species, ${summary.totalTreesPerAcre.toFixed(1)} TPA.`
-          : `No parsed inventory is loaded. ${inventoryColumnHelp}`}
+          : `No parsed inventory is loaded. Uploading a file is not enough; CARBINE has to parse usable tree rows from it. ${inventoryColumnHelp}`}
       </p>
       <button type="button" className="primary" onClick={run} disabled={busy}>
         <Play size={18} /> {busy ? "Running" : "Run scenarios"}

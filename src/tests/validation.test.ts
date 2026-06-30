@@ -26,4 +26,12 @@ describe("parseInventoryCsv", () => {
     expect(parsed.validation.ok).toBe(true);
     expect(parsed.records[0].speciesCode).toBe("RM");
   });
+
+  it("accepts inventory files without a stand_id column", () => {
+    const parsed = parseInventoryCsv("species_code,dbh_in,trees_per_acre\nSM,12.5,3.2");
+    expect(parsed.validation.ok).toBe(true);
+    expect(parsed.records).toHaveLength(1);
+    expect(parsed.records[0].standId).toBe("Imported stand");
+    expect(parsed.validation.messages.some((message) => message.field === "stand_id")).toBe(true);
+  });
 });

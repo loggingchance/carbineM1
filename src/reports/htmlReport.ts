@@ -3,6 +3,14 @@ import type { CarbineRunRequest } from "../domain/fvsRunRequest";
 import { scenarioDisplayName } from "../domain/scenarioSchema";
 import { summarizeInventory } from "../domain/inventorySchema";
 import { carbonPoolLabels, getCarbonPoolValue, type CarbonPoolKey } from "../utils/carbonPools";
+import {
+  CARBINE_CARBON_DISPLAY_UNIT_LABEL,
+  CARBINE_CARBON_DISPLAY_UNIT_LONG,
+  CARBINE_CARBON_SOURCE_UNIT_LONG,
+  formatCarbonNumber,
+  formatCarbonSignedDelta,
+  formatCarbonSignedNumber
+} from "../utils/carbonUnits";
 import { calculateRecoveryMetrics } from "../utils/recoveryMetrics";
 
 export function buildHtmlReport(request: CarbineRunRequest, results: CarbineScenarioResults): string {
@@ -53,7 +61,7 @@ export function buildHtmlReport(request: CarbineRunRequest, results: CarbineScen
   <h1>CARBINE</h1>
   <p><em>Because forest carbon insights need exploring.</em></p>
   <p>Project: ${escapeHtml(request.project.projectName)}<br>Stand: ${escapeHtml(request.project.standName)}<br>Report date: ${new Date().toLocaleDateString()}</p>
-  <p>Projection length: ${request.project.projectionYears} years<br>Cycle length: ${request.project.cycleLengthYears ?? 5} years<br>Carbon pool shown: ${carbonPoolLabels[reportPool]}<br>Carbon units: US short tons of carbon per acre</p>
+  <p>Projection length: ${request.project.projectionYears} years<br>Cycle length: ${request.project.cycleLengthYears ?? 5} years<br>Carbon pool shown: ${carbonPoolLabels[reportPool]}<br>Carbon units: ${CARBINE_CARBON_DISPLAY_UNIT_LONG} (${CARBINE_CARBON_DISPLAY_UNIT_LABEL})</p>
   <p>CARBINE is independently developed and is not an official USDA Forest Service product. It is powered by the USDA Forest Service Forest Vegetation Simulator.</p>
   <p>CARBINE is designed for short-term forest carbon scenario exploration. Results are intended to help compare management choices and carbon trajectories, not to replace a calibrated FVS analysis or a full silvicultural prescription.</p>
   ${warning}
@@ -62,7 +70,7 @@ export function buildHtmlReport(request: CarbineRunRequest, results: CarbineScen
   <h2>Scenario Settings</h2>
   ${buildScenarioSettingsTable(request)}
   <h2>${resultHeading}</h2>
-  <p>All carbon columns in this report are US short tons of carbon per acre.</p>
+  <p>All carbon columns in this report are displayed as ${CARBINE_CARBON_DISPLAY_UNIT_LONG}. FVS source output is ${CARBINE_CARBON_SOURCE_UNIT_LONG}.</p>
   ${scenarioSummary}
   ${recoverySummary}
   ${treatmentEffects}
@@ -119,11 +127,11 @@ function buildTreatmentEffectsTable(series: CarbonResultSeries[], pool: CarbonPo
         `<tr>
           <td>${escapeHtml(scenario.scenarioName)}</td>
           <td>${point.year}</td>
-          <td>${formatNumber(getCarbonPoolValue(point, pool), 1)}</td>
-          <td>${formatSignedDelta(getCarbonPoolValue(point, pool), getCarbonPoolValue(baselinePoint, pool), 1)}</td>
-          <td>${formatNumber(point.liveTreeCarbonTons, 1)}</td>
-          <td>${formatSignedDelta(point.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}</td>
-          <td>${formatNumber(point.harvestedCarbonTons, 1)}</td>
+          <td>${formatCarbonNumber(getCarbonPoolValue(point, pool), 1)}</td>
+          <td>${formatCarbonSignedDelta(getCarbonPoolValue(point, pool), getCarbonPoolValue(baselinePoint, pool), 1)}</td>
+          <td>${formatCarbonNumber(point.liveTreeCarbonTons, 1)}</td>
+          <td>${formatCarbonSignedDelta(point.liveTreeCarbonTons, baselinePoint?.liveTreeCarbonTons, 1)}</td>
+          <td>${formatCarbonNumber(point.harvestedCarbonTons, 1)}</td>
           <td>${formatSignedDelta(point.basalAreaFt2PerAcre, baselinePoint?.basalAreaFt2PerAcre, 0)}</td>
           <td>${formatSignedDelta(point.totalVolumeCuFt, baselinePoint?.totalVolumeCuFt, 0)}</td>
         </tr>`
@@ -161,9 +169,9 @@ function buildScenarioSummaryTable(series: CarbonResultSeries[], pool: CarbonPoo
       const firstRemovalYear = scenario.points.find((point) => (point.harvestedCarbonTons ?? 0) > 0)?.year;
       return `<tr>
         <td>${escapeHtml(scenario.scenarioName)}</td>
-        <td>${formatNumber(getCarbonPoolValue(finalPoint, pool), 1)}</td>
-        <td>${formatNumber(finalPoint?.liveTreeCarbonTons, 1)}</td>
-        <td>${formatNumber(removedCarbon, 1)}${firstRemovalYear ? ` (${firstRemovalYear})` : ""}</td>
+        <td>${formatCarbonNumber(getCarbonPoolValue(finalPoint, pool), 1)}</td>
+        <td>${formatCarbonNumber(finalPoint?.liveTreeCarbonTons, 1)}</td>
+        <td>${formatCarbonNumber(removedCarbon, 1)}${firstRemovalYear ? ` (${firstRemovalYear})` : ""}</td>
         <td>${formatDelta(firstPoint?.basalAreaFt2PerAcre, finalPoint?.basalAreaFt2PerAcre, 0)}</td>
         <td>${formatDelta(firstPoint?.treesPerAcre, finalPoint?.treesPerAcre, 0)}</td>
       </tr>`;
@@ -199,12 +207,12 @@ function buildRecoverySummaryTable(request: CarbineRunRequest, series: CarbonRes
       return `<tr>
         <td>${escapeHtml(scenario.scenarioName)}</td>
         <td>${metrics.treatmentYear}</td>
-        <td>${formatNumber(metrics.preTreatmentCarbon, 1)}</td>
-        <td>${formatNumber(metrics.postTreatmentCarbon, 1)}</td>
-        <td>${formatSignedNumber(metrics.immediateChange, 1)}</td>
-        <td>${formatNumber(metrics.lowestPostTreatmentCarbon, 1)}</td>
-        <td>${formatNumber(metrics.endCarbon, 1)}</td>
-        <td>${formatSignedNumber(metrics.endDifferenceVsNoAction, 1)}</td>
+        <td>${formatCarbonNumber(metrics.preTreatmentCarbon, 1)}</td>
+        <td>${formatCarbonNumber(metrics.postTreatmentCarbon, 1)}</td>
+        <td>${formatCarbonSignedNumber(metrics.immediateChange, 1)}</td>
+        <td>${formatCarbonNumber(metrics.lowestPostTreatmentCarbon, 1)}</td>
+        <td>${formatCarbonNumber(metrics.endCarbon, 1)}</td>
+        <td>${formatCarbonSignedNumber(metrics.endDifferenceVsNoAction, 1)}</td>
         <td>${metrics.recoveryYear ?? "Not recovered within projection period"}</td>
       </tr>`;
     })
@@ -237,9 +245,9 @@ function buildScenarioSection(scenarioName: string, points: CarbonResultPoint[],
       (point) =>
         `<tr>
           <td>${point.year}</td>
-          <td>${formatNumber(getCarbonPoolValue(point, pool), 1)}</td>
-          <td>${formatNumber(point.liveTreeCarbonTons, 1)}</td>
-          <td>${formatNumber(point.harvestedCarbonTons, 1)}</td>
+          <td>${formatCarbonNumber(getCarbonPoolValue(point, pool), 1)}</td>
+          <td>${formatCarbonNumber(point.liveTreeCarbonTons, 1)}</td>
+          <td>${formatCarbonNumber(point.harvestedCarbonTons, 1)}</td>
           <td>${formatNumber(point.totalVolumeCuFt, 0)}</td>
           <td>${formatNumber(point.merchantableVolumeCuFt, 0)}</td>
           <td>${formatNumber(point.basalAreaFt2PerAcre, 0)}</td>
@@ -284,11 +292,6 @@ function formatSignedDelta(value: number | undefined, baseline: number | undefin
   if (value === undefined || baseline === undefined) return "";
   const delta = value - baseline;
   return `${delta >= 0 ? "+" : ""}${delta.toFixed(digits)}`;
-}
-
-function formatSignedNumber(value: number | undefined, digits: number): string {
-  if (value === undefined) return "";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
 }
 
 function escapeHtml(value: string): string {

@@ -8,6 +8,16 @@ import {
   getCarbonPoolValue,
   type CarbonPoolKey
 } from "../utils/carbonPools";
+import {
+  CARBINE_CARBON_DISPLAY_UNIT_LABEL,
+  CARBINE_CARBON_DISPLAY_UNIT_LONG,
+  CARBINE_CARBON_SOURCE_UNIT_LONG,
+  displayCarbonValue,
+  formatCarbonNumber,
+  formatCarbonSignedDelta,
+  formatCarbonSignedNumber,
+  formatCarbonWithUnit
+} from "../utils/carbonUnits";
 import { calculateRecoveryMetrics } from "../utils/recoveryMetrics";
 
 export function ResultsDashboard({
@@ -53,7 +63,7 @@ export function ResultsDashboard({
 
   const maxValue = Math.max(
     1,
-    ...results.series.flatMap((series) => series.points.map((point) => getCarbonPoolValue(point, carbonPoolShown) ?? 0))
+    ...results.series.flatMap((series) => series.points.map((point) => displayCarbonValue(getCarbonPoolValue(point, carbonPoolShown)) ?? 0))
   );
   const chartMaximum = niceChartMaximum(maxValue * 1.1);
   const chartTicks = [chartMaximum, chartMaximum * 0.75, chartMaximum * 0.5, chartMaximum * 0.25, 0];
@@ -110,9 +120,9 @@ export function ResultsDashboard({
         </label>
         <p className="quiet">{carbonPoolHelp}</p>
       </div>
-      <p className="quiet"><strong>Carbon units:</strong> US short tons of carbon per acre.</p>
+      <p className="quiet"><strong>Carbon units:</strong> displayed as {CARBINE_CARBON_DISPLAY_UNIT_LONG}. FVS source output is {CARBINE_CARBON_SOURCE_UNIT_LONG}.</p>
       <div className="chart" aria-label={`${carbonPoolLabels[carbonPoolShown]} comparison chart`}>
-        <div className="chart-y-label">Carbon stock (short tons C/acre)</div>
+        <div className="chart-y-label">Carbon stock ({CARBINE_CARBON_DISPLAY_UNIT_LABEL})</div>
         {results.series.map((series, seriesIndex) => {
           const seriesColor = scenarioColors[seriesIndex % scenarioColors.length];
           const finalPointIndex = series.points.length - 1;
@@ -135,7 +145,7 @@ export function ResultsDashboard({
                   ))}
                   <div className="chart-bars">
                     {series.points.map((point, pointIndex) => {
-                      const value = getCarbonPoolValue(point, carbonPoolShown);
+                      const value = displayCarbonValue(getCarbonPoolValue(point, carbonPoolShown));
                       const barHeight = value === undefined ? 0 : (value / chartMaximum) * 100;
                       return (
                         <div className="chart-bar-column" key={`${series.scenarioId}-${point.year}`}>
@@ -145,8 +155,8 @@ export function ResultsDashboard({
                           <span
                             className="chart-bar"
                             role="img"
-                            aria-label={`${series.scenarioName}, ${point.year}: ${formatNumber(value, 1)} short tons C/acre`}
-                            title={`${point.year}: ${formatNumber(value, 1)} short tons C/acre`}
+                            aria-label={`${series.scenarioName}, ${point.year}: ${formatNumber(value, 1)} ${CARBINE_CARBON_DISPLAY_UNIT_LABEL}`}
+                            title={`${point.year}: ${formatNumber(value, 1)} ${CARBINE_CARBON_DISPLAY_UNIT_LABEL}`}
                             style={{ height: `${barHeight}%`, backgroundColor: seriesColor }}
                           />
                         </div>
@@ -214,12 +224,12 @@ export function ResultsDashboard({
                   <tr key={`${series.scenarioId}-recovery`}>
                     <td>{series.scenarioName}</td>
                     <td>{metrics.treatmentYear}</td>
-                    <td>{formatNumber(metrics.preTreatmentCarbon, 1)}</td>
-                    <td>{formatNumber(metrics.postTreatmentCarbon, 1)}</td>
-                    <td>{formatSignedNumber(metrics.immediateChange, 1)}</td>
-                    <td>{formatNumber(metrics.lowestPostTreatmentCarbon, 1)}</td>
-                    <td>{formatNumber(metrics.endCarbon, 1)}</td>
-                    <td>{formatSignedNumber(metrics.endDifferenceVsNoAction, 1)}</td>
+                    <td>{formatCarbonNumber(metrics.preTreatmentCarbon, 1)}</td>
+                    <td>{formatCarbonNumber(metrics.postTreatmentCarbon, 1)}</td>
+                    <td>{formatCarbonSignedNumber(metrics.immediateChange, 1)}</td>
+                    <td>{formatCarbonNumber(metrics.lowestPostTreatmentCarbon, 1)}</td>
+                    <td>{formatCarbonNumber(metrics.endCarbon, 1)}</td>
+                    <td>{formatCarbonSignedNumber(metrics.endDifferenceVsNoAction, 1)}</td>
                     <td>{metrics.recoveryYear ?? "Not recovered within projection period"}</td>
                   </tr>
                 ))}
@@ -251,11 +261,11 @@ export function ResultsDashboard({
                   <tr key={`${series.scenarioId}-${point.year}-baseline-delta`}>
                     <td>{series.scenarioName}</td>
                     <td>{point.year}</td>
-                    <td>{formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
-                    <td>{formatSignedDelta(getCarbonPoolValue(point, carbonPoolShown), getCarbonPoolValue(baseline, carbonPoolShown), 1)}</td>
-                    <td>{formatNumber(point.liveTreeCarbonTons, 1)}</td>
-                    <td>{formatSignedDelta(point.liveTreeCarbonTons, baseline?.liveTreeCarbonTons, 1)}</td>
-                    <td>{formatNumber(point.harvestedCarbonTons, 1)}</td>
+                    <td>{formatCarbonNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
+                    <td>{formatCarbonSignedDelta(getCarbonPoolValue(point, carbonPoolShown), getCarbonPoolValue(baseline, carbonPoolShown), 1)}</td>
+                    <td>{formatCarbonNumber(point.liveTreeCarbonTons, 1)}</td>
+                    <td>{formatCarbonSignedDelta(point.liveTreeCarbonTons, baseline?.liveTreeCarbonTons, 1)}</td>
+                    <td>{formatCarbonNumber(point.harvestedCarbonTons, 1)}</td>
                     <td>{formatSignedDelta(point.basalAreaFt2PerAcre, baseline?.basalAreaFt2PerAcre, 0)}</td>
                     <td>{formatSignedDelta(point.totalVolumeCuFt, baseline?.totalVolumeCuFt, 0)}</td>
                   </tr>
@@ -286,9 +296,9 @@ export function ResultsDashboard({
                 <tr key={`${series.scenarioId}-${point.year}`}>
                   <td>{series.scenarioName}</td>
                   <td>{point.year}</td>
-                  <td>{formatNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
-                  <td>{formatNumber(point.liveTreeCarbonTons, 1)}</td>
-                  <td>{formatNumber(point.harvestedCarbonTons, 1)}</td>
+                  <td>{formatCarbonNumber(getCarbonPoolValue(point, carbonPoolShown), 1)}</td>
+                  <td>{formatCarbonNumber(point.liveTreeCarbonTons, 1)}</td>
+                  <td>{formatCarbonNumber(point.harvestedCarbonTons, 1)}</td>
                   <td>{formatNumber(point.totalVolumeCuFt, 0)}</td>
                   <td>{formatNumber(point.merchantableVolumeCuFt, 0)}</td>
                   <td>{formatNumber(point.basalAreaFt2PerAcre, 0)}</td>
@@ -308,7 +318,7 @@ function formatNumber(value: number | undefined, digits: number): string {
 }
 
 function formatCarbon(value: number | undefined): string {
-  return value === undefined ? "" : `${value.toFixed(1)} short tons C/acre`;
+  return formatCarbonWithUnit(value);
 }
 
 function formatDelta(start: number | undefined, end: number | undefined, digits: number): string {
@@ -321,11 +331,6 @@ function formatSignedDelta(value: number | undefined, baseline: number | undefin
   if (value === undefined || baseline === undefined) return "";
   const delta = value - baseline;
   return `${delta >= 0 ? "+" : ""}${delta.toFixed(digits)}`;
-}
-
-function formatSignedNumber(value: number | undefined, digits: number): string {
-  if (value === undefined) return "";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`;
 }
 
 const scenarioColors = ["#1f5a44", "#c6a348", "#5c6f82", "#8a5a44", "#6f7f4b"];
