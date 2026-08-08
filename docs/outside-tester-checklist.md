@@ -1,16 +1,16 @@
 # CARBINE Outside Tester Checklist
 
-This checklist is for hosted official-FVS testing of CARBINE.
+This checklist is for official-FVS testing of CARBINE. Prefer the user's local FVS installation through the Carbine FVS Connector. Use Carbine Cloud FVS when local FVS is unavailable.
 
 ## Start CARBINE
 
 Open the CARBINE web address supplied by the project owner.
 
-Outside testers should not need to install FVS, open a command prompt, or start a local bridge. If CARBINE asks for a local bridge, that build is not the hosted tester build.
+Outside testers can run on their own FVS installation by starting the Carbine FVS Connector. If they cannot install FVS or start the connector, switch the Run screen to Carbine Cloud FVS.
 
-## Developer-only local check
+## Local FVS check
 
-Use this only when verifying the development workstation, not when handing CARBINE to outside testers.
+Use this when verifying a local FVS installation and connector.
 
 From the CARBINE project folder:
 
@@ -65,10 +65,10 @@ http://127.0.0.1:5174/
 5. Add one or more treatment scenarios.
 6. Use the treatment-year dropdown. Do not type off-cycle years.
 7. Review the actual FVS control preview under each scenario.
-8. Go to Tester and confirm the Hosted FVS API is reachable.
+8. Go to Tester and confirm Local FVS is reachable. If it is not, switch to Carbine Cloud FVS and confirm the hosted API is reachable.
 9. Confirm the requested variant is available.
 10. Go to Run.
-11. Confirm the runtime is `Hosted FVS API`.
+11. Confirm the runtime is `Local FVS` when the connector is available, or `Carbine Cloud FVS` as the fallback.
 12. Run scenarios.
 13. Confirm Results says `Real FVS runtime`.
 14. Review Scenario Summary and Treatment effects vs no treatment.
@@ -87,7 +87,7 @@ Send these files or notes after each test:
 
 ## Current known limits
 
-- The outside-test build can request any compiled official FVS regional variant reported by the hosted API. Review species codes, FVS forest/location code, and site index for the selected variant.
+- The outside-test build can request any compiled official FVS regional variant reported by the local connector or hosted API. Review species codes, FVS forest/location code, and site index for the selected variant.
 - Carbon is parsed from official FVS `FMIN` / `CARBREPT` stand carbon output.
 - Soil carbon is excluded.
 - Treatments currently use simple `THINDBH` controls: treatment year, DBH min/max, and percent basal area removal.

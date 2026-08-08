@@ -2,14 +2,15 @@ import { createServer } from "node:http";
 import { access, constants, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
-import { join, resolve } from "node:path";
-import { tmpdir } from "node:os";
+import { basename, join, resolve } from "node:path";
+import { homedir, platform, tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
 const port = Number(process.env.CARBINE_FVS_PORT ?? 8787);
 const host = process.env.CARBINE_FVS_HOST ?? "127.0.0.1";
 const fvsExe = process.env.FVS_EXE;
-const binDir = resolve(process.env.FVS_BIN_DIR ?? join("fvs-src", "ForestVegetationSimulator-main", "bin"));
+const configuredBinDir = process.env.FVS_BIN_DIR;
+const binDir = resolve(configuredBinDir ?? join("fvs-src", "ForestVegetationSimulator-main", "bin"));
 const allowedOrigins = (process.env.CARBINE_ALLOWED_ORIGINS ?? "*")
   .split(",")
   .map((origin) => origin.trim())
@@ -17,8 +18,9 @@ const allowedOrigins = (process.env.CARBINE_ALLOWED_ORIGINS ?? "*")
 
 const server = createServer(async (request, response) => {
   response.setHeader("Access-Control-Allow-Origin", resolveCorsOrigin(request.headers.origin));
-  response.setHeader("Access-Control-Allow-Headers", "content-type");
+  response.setHeader("Access-Control-Allow-Headers", request.headers["access-control-request-headers"] ?? "content-type");
   response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  response.setHeader("Access-Control-Allow-Private-Network", "true");
   response.setHeader("Content-Type", "application/json");
   response.setHeader("Vary", "Origin");
 
@@ -30,15 +32,25 @@ const server = createServer(async (request, response) => {
 
   try {
     if (request.url === "/health") {
-      const variants = await listBuiltVariants();
+      const detected = await detectFvsInstallations();
+      const variants = detected.flatMap((candidate) => candidate.variants.map((variant) => variant.name));
       const check = fvsExe ? await validateFvsExe(fvsExe) : { ok: variants.length > 0 };
-      response.end(JSON.stringify({ ok: check.ok, fvsExe: fvsExe ?? null, variants, error: check.error ?? null }));
+      response.end(
+        JSON.stringify({
+          ok: check.ok,
+          platform: platform(),
+          fvsExe: fvsExe ?? null,
+          variants: [...new Set(variants)].sort(),
+          detected,
+          error: check.error ?? null
+        })
+      );
       return;
     }
 
     if (request.url === "/run" && request.method === "POST") {
       const body = await readJson(request);
-      const exePath = fvsExe ?? resolveVariantExe(body.variant);
+      const exePath = fvsExe ?? await resolveVariantExe(body.variant);
       const check = await validateFvsExe(exePath);
       if (!check.ok) {
         response.writeHead(400);
@@ -98,19 +110,62 @@ function resolveCorsOrigin(origin) {
   return allowedOrigins[0] ?? "*";
 }
 
-async function listBuiltVariants() {
-  if (!existsSync(binDir)) return [];
-  const files = await readdir(binDir);
+async function listVariantsInDir(directory) {
+  if (!directory || !existsSync(directory)) return [];
+  const files = await readdir(directory);
   return files
-    .filter((name) => /^FVS.+\.exe$/i.test(name))
-    .map((name) => name.replace(/\.exe$/i, ""))
+    .filter((name) => /^FVS[a-z0-9]{2}(\.exe)?$/i.test(name))
+    .map((name) => ({ name: name.replace(/\.exe$/i, ""), path: join(directory, name) }))
     .sort();
 }
 
-function resolveVariantExe(variant) {
+async function resolveVariantExe(variant) {
   const normalized = String(variant ?? "NE").trim().toLowerCase();
   const exeName = normalized.startsWith("fvs") ? normalized : `fvs${normalized}`;
-  return join(binDir, `${exeName}.exe`);
+  const detected = await detectFvsInstallations();
+  for (const candidate of detected) {
+    const match = candidate.variants.find((available) => available.name.toLowerCase() === exeName);
+    if (match) return match.path;
+  }
+  return join(binDir, platform() === "win32" ? `${exeName}.exe` : exeName);
+}
+
+async function detectFvsInstallations() {
+  const directories = uniquePaths([
+    configuredBinDir,
+    process.env.CARBINE_FVS_DIR,
+    binDir,
+    join(process.cwd(), "fvs-src", "ForestVegetationSimulator-main", "bin"),
+    platform() === "win32" ? "C:\\FVS" : undefined,
+    platform() === "win32" ? "C:\\Program Files\\FVS" : undefined,
+    platform() === "win32" ? "C:\\Program Files (x86)\\FVS" : undefined,
+    platform() === "win32" ? join(process.env.ProgramFiles ?? "C:\\Program Files", "FVS") : undefined,
+    platform() === "darwin" ? "/Applications/FVS" : undefined,
+    platform() === "darwin" ? "/usr/local/bin" : undefined,
+    platform() === "darwin" ? "/opt/homebrew/bin" : undefined,
+    join(homedir(), "FVS")
+  ]);
+  const candidates = [];
+  for (const directory of directories) {
+    const variants = await listVariantsInDir(directory);
+    if (variants.length > 0) {
+      candidates.push({ path: directory, label: basename(directory) || directory, variants });
+    }
+  }
+  return candidates;
+}
+
+function uniquePaths(paths) {
+  const seen = new Set();
+  return paths
+    .filter(Boolean)
+    .map((candidate) => resolve(candidate))
+    .filter((candidate) => {
+      const key = candidate.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 function readJson(request) {

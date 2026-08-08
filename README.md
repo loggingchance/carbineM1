@@ -2,10 +2,10 @@
 
 Because forest carbon insights need exploring.
 
-CARBINE is a browser-based forest carbon scenario explorer designed around the USDA Forest Service Forest Vegetation Simulator (FVS). The public testing build sends runs to a hosted API that executes compiled official FVS variants.
+CARBINE is a browser-based forest carbon scenario explorer designed around the USDA Forest Service Forest Vegetation Simulator (FVS). The preferred public workflow is to run FVS on the user's own computer through the local Carbine FVS Connector. The hosted API remains available as Carbine Cloud FVS for fallback and convenience runs.
 
 - Public app: https://carbine.forestenterprise.org
-- Hosted FVS API health: https://carbine-api.forestenterprise.org/health
+- Carbine Cloud FVS health: https://carbine-api.forestenterprise.org/health
 
 ## Commands
 
@@ -23,7 +23,7 @@ On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`:
 npm.cmd run dev:live -- --host 127.0.0.1 --port 5174 --force
 ```
 
-For developer-only local official-FVS testing on Windows, start both local services from the project folder:
+For local official-FVS testing on Windows, install the official USDA FVS Complete Package, then start both local services from the project folder:
 
 ```bat
 npm.cmd run doctor
@@ -39,11 +39,11 @@ With the bridge running, verify the official smoke path:
 npm.cmd run smoke:official
 ```
 
-These local commands are for development only. Public testers do not need a command prompt, local FVS installation, or bridge.
+For public users, CARBINE should present this as the Carbine FVS Connector rather than as a developer bridge. See `docs/local-fvs-connector.md`.
 
 ## Official FVS Source Path
 
-CARBINE uses compiled official USDA Forest Service FVS source through the hosted API, not a substitute carbon model.
+CARBINE uses compiled official USDA Forest Service FVS executables, not a substitute carbon model. Those executables can be reached either through the user's local connector or through Carbine Cloud FVS.
 
 This environment could not fetch GitHub from the shell, so place the official source here manually:
 
@@ -87,7 +87,7 @@ npm.cmd run fvs:build:all
 
 ## Runtime Position
 
-FVS remains the authoritative calculation engine. The included `FvsMockAdapter` is for interface development only and must not be represented as real FVS output. The public testing path uses the hosted official-FVS API and parses official FVS `FMIN` / `CARBREPT` output configured for US short tons of carbon per acre. See `docs/user-guide.md` for tester workflow and `docs/fvs-build-notes.md` for the runtime feasibility record.
+FVS remains the authoritative calculation engine. The included `FvsMockAdapter` is for interface development only and must not be represented as real FVS output. The public path prefers the user's local FVS connector and can fall back to the hosted official-FVS API. Both parse official FVS `FMIN` / `CARBREPT` output configured for US short tons of carbon per acre. See `docs/user-guide.md` for tester workflow and `docs/fvs-build-notes.md` for the runtime feasibility record.
 
 ## Web Deployment
 
@@ -99,6 +99,6 @@ The deployed GitHub repository uses this build variable:
 VITE_CARBINE_FVS_API_URL=https://carbine-api.forestenterprise.org
 ```
 
-When that value is present at build time, the Run screen defaults to Hosted FVS API and testers do not need a command prompt, local FVS install, or bridge.
+When that value is present at build time, the Run screen offers Carbine Cloud FVS as a fallback. Local FVS remains the encouraged default mode.
 
 For the first Google Cloud backend path, see `docs/google-cloud-windows-api.md`.

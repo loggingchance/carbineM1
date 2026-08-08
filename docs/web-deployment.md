@@ -1,14 +1,15 @@
 # CARBINE Web Deployment
 
-CARBINE's outside-tester build should not require a command prompt, local FVS install, or local bridge.
+CARBINE's outside-tester build should encourage Local FVS first and keep Carbine Cloud FVS available as a fallback.
 
 ## Required Architecture
 
 1. GitHub Pages, Netlify, or another static host serves the CARBINE browser app.
-2. A hosted CARBINE FVS API runs official FVS executables on a server.
-3. The browser app is built with `VITE_CARBINE_FVS_API_URL` pointing at that API.
+2. A local Carbine FVS Connector runs official FVS executables on the user's computer when available.
+3. A hosted CARBINE FVS API runs official FVS executables on a server as Carbine Cloud FVS.
+4. The browser app is built with `VITE_CARBINE_FVS_API_URL` pointing at that API so the fallback is available.
 
-Static hosting by itself is not enough because native FVS executables cannot run inside GitHub Pages.
+Static hosting by itself is not enough because native FVS executables cannot run inside GitHub Pages. The browser needs either the user's localhost connector or the hosted API.
 
 For the first Google Cloud deployment path, use a Windows Server VM on Google Compute Engine. See `docs/google-cloud-windows-api.md`.
 
@@ -63,8 +64,8 @@ Set the repository variable:
 VITE_CARBINE_FVS_API_URL=https://your-carbine-fvs-api.example.com
 ```
 
-Then deploy the Pages workflow. The Run screen will default to Hosted FVS API.
+Then deploy the Pages workflow. The Run screen will default to Local FVS and offer Carbine Cloud FVS as the fallback.
 
 ## Local Bridge Status
 
-The local bridge remains useful for CARBINE development and smoke testing. It is not the outside-tester product path.
+The local bridge is now the Carbine FVS Connector product path. It remains useful for development and smoke testing too.
