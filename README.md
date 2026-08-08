@@ -26,6 +26,10 @@ npm.cmd run dev:live -- --host 127.0.0.1 --port 5174 --force
 For local official-FVS testing on Windows, install the official USDA FVS Complete Package, then start both local services from the project folder:
 
 ```bat
+START-CARBINE-FVS-CONNECTOR.cmd
+```
+
+```bat
 npm.cmd run doctor
 ```
 
