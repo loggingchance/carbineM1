@@ -12,6 +12,7 @@
     "fvs:bridge": "node scripts/local-fvs-bridge.mjs",
     "fvs:api": "node scripts/local-fvs-bridge.mjs",
     "hosted:health": "node scripts/check-hosted-fvs-api.mjs",
+    "connector:package:win": "node scripts/package-windows-connector.mjs",
     "fvs:source:status": "node scripts/fvs-source-status.mjs",
     "fvs:variants": "node scripts/list-fvs-variants.mjs",
     "fvs:build:all": "node scripts/build-fvs-all-native.mjs",

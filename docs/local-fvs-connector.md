@@ -9,9 +9,10 @@ CARBINE can run FVS on the user's own computer through a small localhost connect
 3. Install USDA Forest Service FVS.
    - Windows: use the official Complete Package at https://www.fs.usda.gov/fvs/software/complete.php.
    - macOS: USDA provides source code rather than a simple official macOS installer. A packaged macOS connector should be treated as future distribution work until the build and redistribution path is verified.
-4. Start the Carbine FVS Connector with `START-CARBINE-FVS-CONNECTOR.cmd`.
-5. Click `Test connection`.
-6. Run scenarios.
+4. Download and unzip the Windows connector package from https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip.
+5. Start the Carbine FVS Connector with `OPEN-CARBINE.cmd` or `START-CARBINE-FVS-CONNECTOR.cmd`.
+6. Click `Test connection`.
+7. Run scenarios.
 
 ## Connector Contract
 

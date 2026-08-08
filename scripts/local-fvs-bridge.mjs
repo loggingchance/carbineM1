@@ -31,20 +31,15 @@ const server = createServer(async (request, response) => {
   }
 
   try {
+    if (request.url === "/" || request.url === "/status") {
+      const health = await getHealthStatus();
+      response.setHeader("Content-Type", "text/html; charset=utf-8");
+      response.end(renderStatusPage(health));
+      return;
+    }
+
     if (request.url === "/health") {
-      const detected = await detectFvsInstallations();
-      const variants = detected.flatMap((candidate) => candidate.variants.map((variant) => variant.name));
-      const check = fvsExe ? await validateFvsExe(fvsExe) : { ok: variants.length > 0 };
-      response.end(
-        JSON.stringify({
-          ok: check.ok,
-          platform: platform(),
-          fvsExe: fvsExe ?? null,
-          variants: [...new Set(variants)].sort(),
-          detected,
-          error: check.error ?? null
-        })
-      );
+      response.end(JSON.stringify(await getHealthStatus()));
       return;
     }
 
@@ -88,6 +83,70 @@ server.listen(port, host, () => {
   console.log(`CARBINE FVS API listening at http://${host}:${port}`);
   console.log(fvsExe ? `Using FVS_EXE=${fvsExe}` : `Using built variants under ${binDir}`);
 });
+
+async function getHealthStatus() {
+  const detected = await detectFvsInstallations();
+  const variants = detected.flatMap((candidate) => candidate.variants.map((variant) => variant.name));
+  const check = fvsExe ? await validateFvsExe(fvsExe) : { ok: variants.length > 0 };
+  return {
+    ok: check.ok,
+    platform: platform(),
+    fvsExe: fvsExe ?? null,
+    variants: [...new Set(variants)].sort(),
+    detected,
+    error: check.error ?? null
+  };
+}
+
+function renderStatusPage(health) {
+  const variants = health.variants.length > 0 ? health.variants.join(", ") : "No FVS variants detected yet.";
+  const detected = health.detected.length > 0
+    ? health.detected.map((candidate) => `<li><code>${escapeHtml(candidate.path)}</code></li>`).join("")
+    : "<li>No FVS folders detected. Install FVS or restart this connector with an FVS folder path.</li>";
+  const statusClass = health.ok ? "ok" : "warn";
+  const statusText = health.ok ? "Local FVS is ready" : "Local FVS needs attention";
+  const error = health.error ? `<p class=\"error\">${escapeHtml(health.error)}</p>` : "";
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carbine FVS Connector</title>
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f4f2ea; color: #17231d; }
+    main { max-width: 820px; margin: 8vh auto; padding: 24px; background: #fff; border: 1px solid #d7ded8; border-radius: 8px; box-shadow: 0 10px 24px rgba(26, 44, 34, 0.1); }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .badge { display: inline-block; margin: 12px 0; padding: 8px 10px; border-radius: 999px; font-weight: 700; }
+    .ok { background: #d7f0dc; color: #143d2d; }
+    .warn { background: #fff3cf; color: #6f4c00; }
+    .error { padding: 10px; background: #f6e9e6; border-radius: 6px; }
+    code { overflow-wrap: anywhere; }
+    li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Carbine FVS Connector</h1>
+    <p class="badge ${statusClass}">${statusText}</p>
+    ${error}
+    <p>Connector address: <code>http://${escapeHtml(host)}:${port}</code></p>
+    <h2>Detected Variants</h2>
+    <p>${escapeHtml(variants)}</p>
+    <h2>Detected FVS Folders</h2>
+    <ul>${detected}</ul>
+    <p>Leave this connector running while using Local FVS in CARBINE.</p>
+  </main>
+</body>
+</html>`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 async function validateFvsExe(exePath) {
   if (!exePath) {
