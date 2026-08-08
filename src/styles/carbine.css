@@ -361,6 +361,10 @@ button {
   min-height: 40px;
 }
 
+a {
+  color: inherit;
+}
+
 .primary,
 .secondary,
 .icon-button {
@@ -386,6 +390,15 @@ button {
   color: #143d2d;
   border-color: #d7ded8;
   padding: 0.55rem 0.75rem;
+}
+
+.link-button {
+  text-decoration: none;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 0.35rem 0.55rem;
 }
 
 button:disabled {
@@ -569,6 +582,9 @@ button:disabled {
 }
 
 .segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border: 0;
   border-radius: 6px;
   padding: 0.5rem 0.8rem;
@@ -633,6 +649,26 @@ button:disabled {
   display: grid;
   justify-items: start;
   gap: 0.75rem;
+}
+
+.local-fvs-help {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 900px;
+  padding: 0.85rem;
+  border: 1px solid #b8dbc1;
+  border-radius: 8px;
+  background: #ecf8ee;
+  color: #143d2d;
+}
+
+.local-fvs-help h3,
+.local-fvs-help p {
+  margin: 0;
+}
+
+.connector-url {
+  color: #30473a;
 }
 
 .tester-checklist {

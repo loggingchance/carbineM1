@@ -24,7 +24,7 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { hasHostedFvsApi, hostedFvsApiUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { hostedFvsApiUrl, localFvsConnectorUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
@@ -74,11 +74,21 @@ export function App() {
   const [lastRunRequest, setLastRunRequest] = useState<CarbineRunRequest | undefined>(storedDraft?.lastRunRequest);
   const [generatedPreview, setGeneratedPreview] = useState(storedDraft?.generatedPreview ?? "");
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>(
-    hasHostedFvsApi ? "hosted" : runtimeModeFromStored(storedDraft?.runtimeMode) ?? "official"
+    runtimeModeFromStored(storedDraft?.runtimeMode) ?? "official"
   );
 
   const demoAdapter = useMemo(() => new FvsMockAdapter(), []);
-  const officialAdapter = useMemo(() => new FvsOfficialSourceAdapter(), []);
+  const officialAdapter = useMemo(
+    () =>
+      new FvsOfficialSourceAdapter(
+        localFvsConnectorUrl,
+        "Local FVS connector",
+        "Local FVS detected",
+        "Local FVS connector offline",
+        `Install FVS, start the Carbine FVS Connector, then leave it running at ${localFvsConnectorUrl}.`
+      ),
+    []
+  );
   const hostedAdapter = useMemo(
     () =>
       new FvsOfficialSourceAdapter(
@@ -171,7 +181,7 @@ export function App() {
 
   return (
     <div className="app">
-      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : hasHostedFvsApi ? "Hosted FVS API" : "Demo data"} />
+      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS"} />
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
       <main className="workspace">
         {activeStep === "Inventory" && (

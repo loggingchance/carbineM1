@@ -39,7 +39,7 @@ export function TesterChecklist({
   const requestedVariant = `FVS${request.fvs.variant}`.toLowerCase();
   const variantBuilt = bridgeHealth?.variants.some((variant) => variant.toLowerCase() === requestedVariant) ?? false;
   const runtimeHealthUrl = runtimeMode === "hosted" && hasHostedFvsApi ? `${hostedFvsApiUrl}/health` : "http://127.0.0.1:8787/health";
-  const runtimeName = runtimeMode === "hosted" ? "Hosted FVS API" : "Local FVS bridge";
+  const runtimeName = runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS connector";
 
   useEffect(() => {
     void checkBridge();
@@ -71,16 +71,14 @@ export function TesterChecklist({
         </span>
       </div>
 
-      <p className="quiet">
-        Use this page as the handoff script for a tester. In a hosted deployment, testers should only need the CARBINE web address.
-      </p>
+      <p className="quiet">Use this page as the handoff script for a tester. Prefer Local FVS when the connector is available; use Carbine Cloud FVS as the fallback.</p>
 
       <div className="checklist-grid">
         <article className="checklist-card">
           <h3><Terminal size={18} /> Tester startup</h3>
-          <p>Hosted tester build:</p>
+          <p>Normal tester startup:</p>
           <pre className="command-snippet">{`Open the CARBINE web address.`}</pre>
-          <p>Developer-only local fallback:</p>
+          <p>Local FVS users:</p>
           <pre className="command-snippet">{`start-carbine.bat`}</pre>
         </article>
 
@@ -105,7 +103,7 @@ export function TesterChecklist({
             </li>
             <li className={runtimeMode === "hosted" && hasHostedFvsApi ? "pass" : "warn"}>
               {runtimeMode === "hosted" && hasHostedFvsApi ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-              Hosted FVS API: {hasHostedFvsApi ? hostedFvsApiUrl : "not configured in this build"}
+              Carbine Cloud FVS: {hasHostedFvsApi ? hostedFvsApiUrl : "not configured in this build"}
             </li>
             <li className={variantBuilt ? "pass" : "warn"}>
               {variantBuilt ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
@@ -113,7 +111,7 @@ export function TesterChecklist({
             </li>
             <li className={isRealFvs ? "pass" : "warn"}>
               {isRealFvs ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-              Official FVS result confirmed: {isRealFvs ? "yes" : "run Official FVS source mode"}
+              Official FVS result confirmed: {isRealFvs ? "yes" : "run Local FVS or Carbine Cloud mode"}
             </li>
           </ul>
           <div className="button-row">
@@ -132,7 +130,7 @@ export function TesterChecklist({
             <li>Load an inventory CSV and confirm the record count looks right.</li>
             <li>Keep a No treatment baseline.</li>
             <li>Add one or more treatment scenarios using the dropdown controls.</li>
-            <li>On Run, choose Hosted FVS API for outside testing, or Local bridge only for developer checks.</li>
+            <li>On Run, choose Local FVS when the connector is running, or Carbine Cloud FVS as the fallback.</li>
             <li>Run scenarios, review Results, then open Report.</li>
             <li>Open Advanced and export diagnostics.</li>
           </ol>

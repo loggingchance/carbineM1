@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Cloud, Download, Laptop, Play, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
@@ -6,7 +6,10 @@ import type { FvsAdapter, FvsRuntimeInfo } from "../fvs/FvsAdapter";
 import { writeInventoryPreview, writeKeywordPreview } from "../fvs/keywordWriter";
 import { inventoryColumnHelp, summarizeInventory } from "../domain/inventorySchema";
 import type { ValidationMessage } from "../domain/validation";
-import { hasHostedFvsApi, type RuntimeMode } from "../config/runtime";
+import { hasHostedFvsApi, localFvsConnectorUrl, type RuntimeMode } from "../config/runtime";
+
+const windowsFvsDownloadUrl = "https://www.fs.usda.gov/fvs/software/complete.php";
+const macFvsSourceUrl = "https://github.com/USDAForestService/ForestVegetationSimulator";
 
 export function RunPanel({
   adapter,
@@ -87,36 +90,63 @@ export function RunPanel({
     setBusy(false);
   }
 
+  async function refreshRuntime() {
+    setRuntimeInfo(undefined);
+    setRuntimeInfo(await adapter.getRuntimeInfo());
+  }
+
   return (
     <section className="panel run-panel">
       <p className="eyebrow">Run</p>
       <h2>Run the scenario set</h2>
-      <p className="quiet">Run the loaded inventory and scenario set through the configured FVS runtime.</p>
-      {!hasHostedFvsApi && (
-        <div className="segmented" aria-label="Runtime mode">
-          <button type="button" className={runtimeMode === "official" ? "active" : ""} onClick={() => onRuntimeModeChange("official")}>
-            Local bridge
-          </button>
-          <button type="button" className={runtimeMode === "demo" ? "active" : ""} onClick={() => onRuntimeModeChange("demo")}>
-            Demo
-          </button>
-        </div>
-      )}
+      <p className="quiet">Use FVS on this computer when available. Carbine Cloud FVS remains available as a convenience fallback.</p>
+      <div className="segmented" aria-label="Runtime mode">
+        <button type="button" className={runtimeMode === "official" ? "active" : ""} onClick={() => onRuntimeModeChange("official")}>
+          <Laptop size={16} /> Local FVS
+        </button>
+        <button
+          type="button"
+          className={runtimeMode === "hosted" ? "active" : ""}
+          onClick={() => onRuntimeModeChange("hosted")}
+          disabled={!hasHostedFvsApi}
+          title={hasHostedFvsApi ? "Use the hosted Carbine FVS API" : "Carbine Cloud FVS is not configured for this build"}
+        >
+          <Cloud size={16} /> Carbine Cloud
+        </button>
+        <button type="button" className={runtimeMode === "demo" ? "active" : ""} onClick={() => onRuntimeModeChange("demo")}>
+          Demo
+        </button>
+      </div>
       {runtimeMode === "hosted" && !hasHostedFvsApi && (
         <p className="note">
-          Hosted FVS API is not configured for this build.
+          Carbine Cloud FVS is not configured for this build.
         </p>
       )}
       {runtimeMode === "official" && (
-        <p className="note">
-          Developer mode only. It requires the official USDA source build and a local bridge running on this computer.
-        </p>
+        <div className="local-fvs-help">
+          <div>
+            <h3>Use your own FVS installation</h3>
+            <p>Install USDA Forest Service FVS, start the Carbine FVS Connector, then Carbine will run FVS through this browser.</p>
+          </div>
+          <div className="button-row">
+            <a className="secondary link-button" href={windowsFvsDownloadUrl} target="_blank" rel="noreferrer">
+              <Download size={16} /> Install FVS for Windows
+            </a>
+            <a className="secondary link-button" href={macFvsSourceUrl} target="_blank" rel="noreferrer">
+              macOS source build
+            </a>
+          </div>
+          <p className="connector-url">Connector address: <code>{localFvsConnectorUrl}</code></p>
+        </div>
       )}
       <div className="runtime-check" aria-live="polite">
         <strong className={runtimeInfo?.isRealFvs ? "real-badge" : "demo-badge"}>
           {runtimeInfo ? runtimeInfo.label : "Checking runtime"}
         </strong>
         <span>{runtimeInfo?.notes.join(" ") ?? "Checking adapter status before running."}</span>
+        <button type="button" className="secondary compact-button" onClick={refreshRuntime}>
+          <RefreshCw size={16} /> Test connection
+        </button>
       </div>
       <p className={request.inventory.length > 0 ? "ready-note" : "note"}>
         {request.inventory.length > 0
