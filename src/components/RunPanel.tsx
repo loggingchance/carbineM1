@@ -9,6 +9,7 @@ import type { ValidationMessage } from "../domain/validation";
 import { hasHostedFvsApi, localFvsConnectorUrl, type RuntimeMode } from "../config/runtime";
 
 const windowsFvsDownloadUrl = "https://www.fs.usda.gov/fvs/software/complete.php";
+const windowsConnectorDownloadUrl = "https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip";
 const macFvsSourceUrl = "https://github.com/USDAForestService/ForestVegetationSimulator";
 
 export function RunPanel({
@@ -131,6 +132,9 @@ export function RunPanel({
           <div className="button-row">
             <a className="secondary link-button" href={windowsFvsDownloadUrl} target="_blank" rel="noreferrer">
               <Download size={16} /> Install FVS for Windows
+            </a>
+            <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
+              <Download size={16} /> Download Carbine connector
             </a>
             <a className="secondary link-button" href={macFvsSourceUrl} target="_blank" rel="noreferrer">
               macOS source build
