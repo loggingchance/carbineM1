@@ -249,9 +249,9 @@ select {
 }
 
 .connector-announcement {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: 1rem;
   width: min(1180px, calc(100% - 2rem));
   margin: 1rem auto 0;
@@ -264,9 +264,10 @@ select {
   box-shadow: 0 8px 18px rgba(26, 44, 34, 0.08);
 }
 
-.connector-announcement div:first-child {
+.connector-copy {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .connector-announcement strong {
@@ -275,6 +276,35 @@ select {
 
 .connector-announcement span {
   color: #30473a;
+}
+
+.top-service-url-field {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 760px;
+  margin-top: 0.2rem;
+  color: #143d2d;
+  font-weight: 700;
+}
+
+.top-service-url-field input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #9dc9ad;
+  border-radius: 6px;
+  padding: 0.55rem 0.65rem;
+  background: #ffffff;
+  color: #0c2d22;
+  font: inherit;
+  font-weight: 500;
+}
+
+.local-service-note {
+  font-size: 0.92rem;
+}
+
+.local-service-note code {
+  color: #143d2d;
 }
 
 .panel {
@@ -1266,8 +1296,8 @@ pre {
   }
 
   .connector-announcement {
+    grid-template-columns: 1fr;
     align-items: stretch;
-    flex-direction: column;
   }
 
 }

@@ -24,7 +24,7 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { hostedFvsApiUrl, localFvsConnectorUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { hostedFvsApiUrl, localFvsConnectorUrl, microFvsApiUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
@@ -184,16 +184,28 @@ export function App() {
     <div className="app">
       <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS"} />
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
-      <section className="connector-announcement" aria-label="Local FVS connector">
-        <div>
-          <strong>New: run FVS on your own computer</strong>
-          <span>Install USDA FVS, download the Carbine connector, then choose Local FVS.</span>
+      <section className="connector-announcement" aria-label="FVS connection setup">
+        <div className="connector-copy">
+          <strong>FVS connection</strong>
+          <span>Use your local FVS connector when it is running, or fall back to the MicroFVS cloud service.</span>
+          <label className="top-service-url-field">
+            <span>Default FVS service</span>
+            <input value={microFvsApiUrl} readOnly />
+          </label>
+          <span className="local-service-note">Local connector: <code>{localFvsConnectorUrl}</code></span>
         </div>
         <div className="button-row">
           <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
             Download connector
           </a>
-          <button type="button" className="primary" onClick={() => setActiveStep("Run")}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              setRuntimeMode("official");
+              setActiveStep("Run");
+            }}
+          >
             Set up Local FVS
           </button>
         </div>
