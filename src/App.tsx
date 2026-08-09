@@ -28,6 +28,7 @@ import { hostedFvsApiUrl, localFvsConnectorUrl, runtimeModeFromStored, type Runt
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
+const windowsConnectorDownloadUrl = "https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip";
 
 const initialProject: StandProject = {
   projectName: "CARBINE sample project",
@@ -183,6 +184,20 @@ export function App() {
     <div className="app">
       <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS"} />
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
+      <section className="connector-announcement" aria-label="Local FVS connector">
+        <div>
+          <strong>New: run FVS on your own computer</strong>
+          <span>Install USDA FVS, download the Carbine connector, then choose Local FVS.</span>
+        </div>
+        <div className="button-row">
+          <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
+            Download connector
+          </a>
+          <button type="button" className="primary" onClick={() => setActiveStep("Run")}>
+            Set up Local FVS
+          </button>
+        </div>
+      </section>
       <main className="workspace">
         {activeStep === "Inventory" && (
           <InventoryUpload project={project} inventory={inventory} onProjectChange={updateProject} onInventoryChange={updateInventory} />
