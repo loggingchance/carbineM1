@@ -303,8 +303,14 @@ select {
   font-size: 0.92rem;
 }
 
-.local-service-note code {
+.local-service-note code,
+.build-note code {
   color: #143d2d;
+}
+
+.build-note {
+  color: #58675e;
+  font-size: 0.82rem;
 }
 
 .panel {
