@@ -248,6 +248,35 @@ select {
   margin: 1.25rem auto 2rem;
 }
 
+.connector-announcement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: min(1180px, calc(100% - 2rem));
+  margin: 1rem auto 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #b8dbc1;
+  border-left: 5px solid #2f7a4f;
+  border-radius: 8px;
+  background: #ecf8ee;
+  color: #143d2d;
+  box-shadow: 0 8px 18px rgba(26, 44, 34, 0.08);
+}
+
+.connector-announcement div:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.connector-announcement strong {
+  font-family: "Archivo", "Segoe UI", sans-serif;
+}
+
+.connector-announcement span {
+  color: #30473a;
+}
+
 .panel {
   background: #ffffff;
   border: 1px solid #d7ded8;
@@ -1201,6 +1230,11 @@ pre {
 
   .diagnostics-share-note {
     grid-template-columns: 1fr;
+  }
+
+  .connector-announcement {
+    align-items: stretch;
+    flex-direction: column;
   }
 
 }
