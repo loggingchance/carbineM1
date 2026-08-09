@@ -9,6 +9,7 @@ import { ResultsDashboard } from "./components/ResultsDashboard";
 import { ReportPreview } from "./components/ReportPreview";
 import { AdvancedFvsPanel } from "./components/AdvancedFvsPanel";
 import { AboutCarbine } from "./components/AboutCarbine";
+import { FvsSetupGuide } from "./components/FvsSetupGuide";
 import { Disclaimer } from "./components/Disclaimer";
 import type { TreeRecord } from "./domain/inventorySchema";
 import type { StandProject } from "./domain/inventorySchema";
@@ -24,10 +25,10 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { carbineBuildLabel, hostedFvsApiUrl, localFvsConnectorUrl, microFvsProjectUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { carbineBuildLabel, hostedFvsApiUrl, localFvsConnectorUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
-const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
+const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "Setup FVS", "About"];
 const windowsConnectorDownloadUrl = "https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip";
 
 const initialProject: StandProject = {
@@ -192,13 +193,16 @@ export function App() {
             <span>Default FVS connection</span>
             <input value={localFvsConnectorUrl} readOnly />
           </label>
-          <span className="local-service-note">MicroFVS source: <a href={microFvsProjectUrl} target="_blank" rel="noreferrer">Vibrant Planet Open Science</a>. No public MicroFVS endpoint is configured.</span>
+          <span className="local-service-note">Install FVS and the CARBINE connector, then test the connection before running scenarios.</span>
           <span className="build-note">CARBINE build: <code>{carbineBuildLabel}</code></span>
         </div>
         <div className="button-row">
           <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
             Download connector
           </a>
+          <button type="button" className="secondary" onClick={() => setActiveStep("Setup FVS")}>
+            Setup instructions
+          </button>
           <button
             type="button"
             className="primary"
@@ -258,6 +262,14 @@ export function App() {
             currentRequest={request}
             results={results}
             generatedPreview={generatedPreview}
+          />
+        )}
+        {activeStep === "Setup FVS" && (
+          <FvsSetupGuide
+            onGoToRun={() => {
+              setRuntimeMode("official");
+              setActiveStep("Run");
+            }}
           />
         )}
         {activeStep === "About" && <AboutCarbine />}
