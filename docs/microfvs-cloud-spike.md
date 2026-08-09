@@ -71,6 +71,8 @@ The compatibility API should expose CARBINE's existing `/health` and `/run` cont
 - Convert the MicroFVS result to CARBINE's existing raw-output shape while CARBINE still uses its parser.
 - Later, convert MicroFVS scraped tables directly to `CarbonResultSeries` and reduce text parsing.
 
+The first CARBINE-side mapper is in `src/fvs/microfvsMapper.ts`. It intentionally supports baseline payload generation only and fails closed for treatment scenarios until those controls are mapped and validated against MicroFVS output.
+
 ## fvs2py Position
 
 `fvs2py` is useful for a Python-native backend that calls FVS shared libraries directly. It is not a browser/local-user workflow by itself. Treat it as a future backend engine candidate if MicroFVS is too restrictive or if CARBINE needs deeper in-memory control than MicroFVS exposes.
