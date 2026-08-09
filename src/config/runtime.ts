@@ -7,7 +7,9 @@ const rawMicroFvsApiUrl = import.meta.env.VITE_CARBINE_MICROFVS_API_URL as strin
 export const hostedFvsApiUrl = normalizeUrl(rawHostedFvsApiUrl);
 export const hasHostedFvsApi = hostedFvsApiUrl.length > 0;
 export const localFvsConnectorUrl = normalizeUrl(rawLocalFvsConnectorUrl) || "http://127.0.0.1:8787";
-export const microFvsApiUrl = normalizeUrl(rawMicroFvsApiUrl) || "https://carbine-api.forestenterprise.org/microfvs";
+export const microFvsApiUrl = normalizeUrl(rawMicroFvsApiUrl);
+export const hasMicroFvsApi = microFvsApiUrl.length > 0;
+export const microFvsProjectUrl = "https://github.com/Vibrant-Planet-Open-Science/microfvs";
 
 export function runtimeModeFromStored(value: unknown): RuntimeMode | undefined {
   return value === "hosted" || value === "official" || value === "demo" ? value : undefined;

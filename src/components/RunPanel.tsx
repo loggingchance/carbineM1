@@ -6,7 +6,7 @@ import type { FvsAdapter, FvsRuntimeInfo } from "../fvs/FvsAdapter";
 import { writeInventoryPreview, writeKeywordPreview } from "../fvs/keywordWriter";
 import { inventoryColumnHelp, summarizeInventory } from "../domain/inventorySchema";
 import type { ValidationMessage } from "../domain/validation";
-import { hasHostedFvsApi, hostedFvsApiUrl, localFvsConnectorUrl, microFvsApiUrl, type RuntimeMode } from "../config/runtime";
+import { hasHostedFvsApi, hasMicroFvsApi, hostedFvsApiUrl, localFvsConnectorUrl, microFvsApiUrl, microFvsProjectUrl, type RuntimeMode } from "../config/runtime";
 
 const windowsFvsDownloadUrl = "https://www.fs.usda.gov/fvs/software/complete.php";
 const windowsConnectorDownloadUrl = "https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip";
@@ -147,16 +147,19 @@ export function RunPanel({
         <div className="cloud-fvs-help">
           <div>
             <h3>Carbine Cloud FVS</h3>
-            <p>The current cloud fallback stays available while the MicroFVS service is brought behind CARBINE's run contract.</p>
+            <p>Carbine Cloud is an optional fallback. MicroFVS is open-source service code; no third-party public MicroFVS API endpoint is configured in this build.</p>
           </div>
           <label className="service-url-field">
             <span>Cloud compatibility API</span>
             <input value={hostedFvsApiUrl || "Not configured"} readOnly />
           </label>
           <label className="service-url-field">
-            <span>MicroFVS cloud service</span>
-            <input value={microFvsApiUrl} readOnly />
+            <span>MicroFVS public API endpoint</span>
+            <input value={hasMicroFvsApi ? microFvsApiUrl : "Not configured"} readOnly />
           </label>
+          <a className="secondary link-button" href={microFvsProjectUrl} target="_blank" rel="noreferrer">
+            View MicroFVS project
+          </a>
         </div>
       )}
       <div className="runtime-check" aria-live="polite">
