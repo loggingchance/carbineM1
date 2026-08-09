@@ -24,7 +24,7 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { hostedFvsApiUrl, localFvsConnectorUrl, microFvsProjectUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { carbineBuildLabel, hostedFvsApiUrl, localFvsConnectorUrl, microFvsProjectUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
@@ -193,6 +193,7 @@ export function App() {
             <input value={localFvsConnectorUrl} readOnly />
           </label>
           <span className="local-service-note">MicroFVS source: <a href={microFvsProjectUrl} target="_blank" rel="noreferrer">Vibrant Planet Open Science</a>. No public MicroFVS endpoint is configured.</span>
+          <span className="build-note">CARBINE build: <code>{carbineBuildLabel}</code></span>
         </div>
         <div className="button-row">
           <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
