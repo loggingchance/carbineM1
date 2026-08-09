@@ -29,6 +29,8 @@ await copyFile(join(repoRoot, "scripts", "local-fvs-bridge.mjs"), join(stageRoot
 await writeFile(join(stageRoot, "START-CARBINE-FVS-CONNECTOR.cmd"), startConnectorCmd(), "utf8");
 await writeFile(join(stageRoot, "OPEN-CARBINE.cmd"), openCarbineCmd(), "utf8");
 await writeFile(join(stageRoot, "CHECK-CONNECTOR.cmd"), checkConnectorCmd(), "utf8");
+await writeFile(join(stageRoot, "INSTALL-CARBINE-FVS-CONNECTOR.cmd"), installConnectorCmd(), "utf8");
+await writeFile(join(stageRoot, "UNINSTALL-CARBINE-FVS-CONNECTOR.cmd"), uninstallConnectorCmd(), "utf8");
 await writeFile(join(stageRoot, "README.txt"), readmeText(), "utf8");
 
 await compressArchive(stageRoot, archivePath);
@@ -96,6 +98,54 @@ echo Leave the connector window open while using Local FVS.
 `;
 }
 
+function installConnectorCmd() {
+  return `@echo off
+setlocal
+
+set "SOURCE=%~dp0"
+set "INSTALL_DIR=%LOCALAPPDATA%\\CarbineFvsConnector"
+set "START_MENU=%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Carbine"
+
+echo Installing Carbine FVS Connector...
+echo.
+echo Install folder: %INSTALL_DIR%
+echo.
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "New-Item -ItemType Directory -Force -Path $env:INSTALL_DIR | Out-Null; Copy-Item -Path (Join-Path $env:SOURCE '*') -Destination $env:INSTALL_DIR -Recurse -Force; New-Item -ItemType Directory -Force -Path $env:START_MENU | Out-Null; $shell=New-Object -ComObject WScript.Shell; $items=@(@('Open CARBINE with Local FVS.lnk','OPEN-CARBINE.cmd'),@('Start Carbine FVS Connector.lnk','START-CARBINE-FVS-CONNECTOR.cmd'),@('Check Carbine FVS Connector.lnk','CHECK-CONNECTOR.cmd'),@('Uninstall Carbine FVS Connector.lnk','UNINSTALL-CARBINE-FVS-CONNECTOR.cmd')); foreach($item in $items){ $lnk=$shell.CreateShortcut((Join-Path $env:START_MENU $item[0])); $lnk.TargetPath=Join-Path $env:INSTALL_DIR $item[1]; $lnk.WorkingDirectory=$env:INSTALL_DIR; $lnk.Save() }"
+
+if errorlevel 1 (
+  echo.
+  echo Installation did not complete.
+  pause
+  exit /b 1
+)
+
+echo.
+echo Installed. Open the Windows Start Menu and search for:
+echo   Open CARBINE with Local FVS
+echo.
+pause
+`;
+}
+
+function uninstallConnectorCmd() {
+  return `@echo off
+setlocal
+
+set "INSTALL_DIR=%LOCALAPPDATA%\\CarbineFvsConnector"
+set "START_MENU=%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Carbine"
+
+echo Uninstalling Carbine FVS Connector...
+echo.
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item -LiteralPath $env:START_MENU -Recurse -Force -ErrorAction SilentlyContinue; $install=$env:INSTALL_DIR; $script=Join-Path $env:TEMP 'remove-carbine-fvs-connector.ps1'; Set-Content -Path $script -Value ('Start-Sleep -Seconds 2; Remove-Item -LiteralPath ''' + $install.Replace('''','''''') + ''' -Recurse -Force -ErrorAction SilentlyContinue'); Start-Process powershell -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File',$script -WindowStyle Hidden"
+
+echo.
+echo Uninstall requested. This window can be closed.
+exit /b 0
+`;
+}
+
 function checkConnectorCmd() {
   return `@echo off
 setlocal
@@ -119,9 +169,15 @@ It does not expose FVS to the internet.
 Normal use
 ----------
 1. Install USDA Forest Service FVS for Windows.
-2. Double-click OPEN-CARBINE.cmd.
-3. Leave the connector window open.
-4. In CARBINE, choose Local FVS and click Test connection.
+2. Double-click INSTALL-CARBINE-FVS-CONNECTOR.cmd.
+3. Open the Windows Start Menu and choose Open CARBINE with Local FVS.
+4. Leave the connector window open.
+5. In CARBINE, choose Local FVS and click Test connection.
+
+Portable use
+------------
+Double-click OPEN-CARBINE.cmd from this folder if you do not want to install
+Start Menu shortcuts.
 
 Connector only
 --------------
@@ -139,7 +195,8 @@ Double-click CHECK-CONNECTOR.cmd to see whether the connector is reachable
 and how many FVS variants it found.
 
 The connector searches common FVS locations, including C:\\FVS,
-C:\\Program Files\\FVS, and C:\\Users\\<you>\\FVS.
+C:\\Program Files\\FVS, C:\\Users\\<you>\\FVS, Windows uninstall records,
+and Start Menu shortcuts.
 `;
 }
 

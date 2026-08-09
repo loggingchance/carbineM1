@@ -10,9 +10,10 @@ CARBINE can run FVS on the user's own computer through a small localhost connect
    - Windows: use the official Complete Package at https://www.fs.usda.gov/fvs/software/complete.php.
    - macOS: USDA provides source code rather than a simple official macOS installer. A packaged macOS connector should be treated as future distribution work until the build and redistribution path is verified.
 4. Download and unzip the Windows connector package from https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip.
-5. Start the Carbine FVS Connector with `OPEN-CARBINE.cmd` or `START-CARBINE-FVS-CONNECTOR.cmd`.
-6. Click `Test connection`.
-7. Run scenarios.
+5. Double-click `INSTALL-CARBINE-FVS-CONNECTOR.cmd`.
+6. Open the Windows Start Menu and choose `Open CARBINE with Local FVS`.
+7. Click `Test connection`.
+8. Run scenarios.
 
 ## Connector Contract
 
@@ -37,11 +38,20 @@ The current Node connector checks these sources:
 
 If detection fails, set `FVS_BIN_DIR` to the folder containing `FVSne.exe`, `FVSls.exe`, and the other variant executables, or set `FVS_EXE` to one executable for single-variant testing.
 
-On Windows, the launcher also accepts an explicit FVS folder:
+The Windows package can be used without installing shortcuts by double-clicking `OPEN-CARBINE.cmd` from the unzipped folder.
+
+The connector launcher also accepts an explicit FVS folder:
 
 ```bat
 START-CARBINE-FVS-CONNECTOR.cmd "C:\FVS\bin"
 ```
+
+The packaged connector creates Start Menu shortcuts for:
+
+- `Open CARBINE with Local FVS`
+- `Start Carbine FVS Connector`
+- `Check Carbine FVS Connector`
+- `Uninstall Carbine FVS Connector`
 
 ## Browser Security Notes
 

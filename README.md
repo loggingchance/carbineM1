@@ -29,6 +29,8 @@ For local official-FVS testing on Windows, install the official USDA FVS Complet
 START-CARBINE-FVS-CONNECTOR.cmd
 ```
 
+The packaged Windows connector also includes `INSTALL-CARBINE-FVS-CONNECTOR.cmd`, which installs the connector under `%LOCALAPPDATA%\CarbineFvsConnector` and adds Start Menu shortcuts.
+
 ```bat
 npm.cmd run doctor
 ```

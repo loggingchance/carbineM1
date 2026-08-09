@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { access, constants, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { homedir, platform, tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 
@@ -190,7 +190,8 @@ async function resolveVariantExe(variant) {
 }
 
 async function detectFvsInstallations() {
-  const directories = uniquePaths([
+  const hintDirectories = platform() === "win32" ? await detectWindowsFvsHints() : [];
+  const directories = uniquePaths(expandCandidateDirectories([
     configuredBinDir,
     process.env.CARBINE_FVS_DIR,
     binDir,
@@ -202,8 +203,9 @@ async function detectFvsInstallations() {
     platform() === "darwin" ? "/Applications/FVS" : undefined,
     platform() === "darwin" ? "/usr/local/bin" : undefined,
     platform() === "darwin" ? "/opt/homebrew/bin" : undefined,
-    join(homedir(), "FVS")
-  ]);
+    join(homedir(), "FVS"),
+    ...hintDirectories
+  ]));
   const candidates = [];
   for (const directory of directories) {
     const variants = await listVariantsInDir(directory);
@@ -212,6 +214,100 @@ async function detectFvsInstallations() {
     }
   }
   return candidates;
+}
+
+function expandCandidateDirectories(paths) {
+  const expanded = [];
+  for (const candidate of paths.filter(Boolean)) {
+    expanded.push(candidate);
+    expanded.push(join(candidate, "bin"));
+    expanded.push(join(candidate, "Bin"));
+    expanded.push(join(candidate, "FVSbin"));
+    expanded.push(join(candidate, "FVS"));
+  }
+  return expanded;
+}
+
+async function detectWindowsFvsHints() {
+  const hints = [
+    ...(await detectWindowsRegistryFvsDirs()),
+    ...(await detectWindowsShortcutFvsDirs())
+  ];
+  return hints;
+}
+
+async function detectWindowsRegistryFvsDirs() {
+  const roots = [
+    "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+    "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+    "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
+  ];
+  const dirs = [];
+  for (const root of roots) {
+    const result = await runCommand("reg.exe", ["query", root, "/s"]);
+    if (result.code !== 0) continue;
+    const blocks = result.stdout.split(/\r?\n\r?\n/);
+    for (const block of blocks) {
+      if (!/\b(FVS|Forest Vegetation Simulator|Suppose)\b/i.test(block)) continue;
+      for (const key of ["InstallLocation", "DisplayIcon", "UninstallString"]) {
+        const match = block.match(new RegExp(`\\s${key}\\s+REG_\\w+\\s+(.+)`, "i"));
+        if (!match) continue;
+        const dir = normalizeWindowsInstallHint(match[1]);
+        if (dir) dirs.push(dir);
+      }
+    }
+  }
+  return dirs;
+}
+
+async function detectWindowsShortcutFvsDirs() {
+  const command = [
+    "$paths=@($env:ProgramData + '\\Microsoft\\Windows\\Start Menu\\Programs',$env:APPDATA + '\\Microsoft\\Windows\\Start Menu\\Programs');",
+    "$shell=New-Object -ComObject WScript.Shell;",
+    "foreach($root in $paths){",
+    "if(Test-Path $root){",
+    "Get-ChildItem -Path $root -Recurse -Filter *.lnk -ErrorAction SilentlyContinue | ForEach-Object {",
+    "try { $s=$shell.CreateShortcut($_.FullName); if(($s.TargetPath -match 'FVS|Suppose|Forest') -or ($_.FullName -match 'FVS|Suppose|Forest')) { $s.TargetPath } } catch {}",
+    "}",
+    "}",
+    "}"
+  ].join(" ");
+  const result = await runCommand("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command]);
+  if (result.code !== 0) return [];
+  return result.stdout
+    .split(/\r?\n/)
+    .map(normalizeWindowsInstallHint)
+    .filter(Boolean);
+}
+
+function normalizeWindowsInstallHint(value) {
+  const cleaned = String(value ?? "")
+    .trim()
+    .replace(/^"([^"]+)".*$/, "$1")
+    .replace(/^'([^']+)'.*$/, "$1");
+  if (!cleaned || /^msiexec/i.test(cleaned)) return "";
+  const withoutArgs = cleaned.match(/^[A-Za-z]:\\.*?\.(?:exe|cmd|bat)/i)?.[0] ?? cleaned;
+  return /\.(exe|cmd|bat)$/i.test(withoutArgs) ? dirname(withoutArgs) : withoutArgs;
+}
+
+function runCommand(command, args) {
+  return new Promise((resolveRun) => {
+    const child = spawn(command, args, { windowsHide: true });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+    child.on("error", (error) => {
+      resolveRun({ code: -1, stdout, stderr: `${stderr}\n${error.message}` });
+    });
+    child.on("close", (code) => {
+      resolveRun({ code, stdout, stderr });
+    });
+  });
 }
 
 function uniquePaths(paths) {
