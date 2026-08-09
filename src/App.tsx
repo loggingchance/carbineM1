@@ -24,7 +24,7 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { hostedFvsApiUrl, localFvsConnectorUrl, microFvsApiUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { hostedFvsApiUrl, localFvsConnectorUrl, microFvsProjectUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "About"];
@@ -187,12 +187,12 @@ export function App() {
       <section className="connector-announcement" aria-label="FVS connection setup">
         <div className="connector-copy">
           <strong>FVS connection</strong>
-          <span>Use your local FVS connector when it is running, or fall back to the MicroFVS cloud service.</span>
+          <span>Default to the local connector so FVS runs on the user's own computer.</span>
           <label className="top-service-url-field">
-            <span>Default FVS service</span>
-            <input value={microFvsApiUrl} readOnly />
+            <span>Default FVS connection</span>
+            <input value={localFvsConnectorUrl} readOnly />
           </label>
-          <span className="local-service-note">Local connector: <code>{localFvsConnectorUrl}</code></span>
+          <span className="local-service-note">MicroFVS source: <a href={microFvsProjectUrl} target="_blank" rel="noreferrer">Vibrant Planet Open Science</a>. No public MicroFVS endpoint is configured.</span>
         </div>
         <div className="button-row">
           <a className="secondary link-button" href={windowsConnectorDownloadUrl} target="_blank" rel="noreferrer">
