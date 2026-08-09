@@ -13,6 +13,8 @@ Static hosting by itself is not enough because native FVS executables cannot run
 
 For the first Google Cloud deployment path, use a Windows Server VM on Google Compute Engine. See `docs/google-cloud-windows-api.md`.
 
+MicroFVS is a promising future implementation for Carbine Cloud FVS, but it does not currently match CARBINE's `/health` and `/run` contract directly. See `docs/microfvs-cloud-spike.md` before swapping the hosted backend.
+
 ## API Contract
 
 The hosted API should match the local bridge contract:
