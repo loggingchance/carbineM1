@@ -1,20 +1,13 @@
-export type RuntimeMode = "hosted" | "official" | "demo";
+export type RuntimeMode = "official" | "demo";
 
-const rawHostedFvsApiUrl = import.meta.env.VITE_CARBINE_FVS_API_URL as string | undefined;
 const rawLocalFvsConnectorUrl = import.meta.env.VITE_CARBINE_LOCAL_FVS_URL as string | undefined;
-const rawMicroFvsApiUrl = import.meta.env.VITE_CARBINE_MICROFVS_API_URL as string | undefined;
 const rawBuildId = import.meta.env.VITE_CARBINE_BUILD_ID as string | undefined;
 
-export const hostedFvsApiUrl = normalizeUrl(rawHostedFvsApiUrl);
-export const hasHostedFvsApi = hostedFvsApiUrl.length > 0;
 export const localFvsConnectorUrl = normalizeUrl(rawLocalFvsConnectorUrl) || "http://127.0.0.1:8787";
-export const microFvsApiUrl = normalizeUrl(rawMicroFvsApiUrl);
-export const hasMicroFvsApi = microFvsApiUrl.length > 0;
-export const microFvsProjectUrl = "https://github.com/Vibrant-Planet-Open-Science/microfvs";
 export const carbineBuildLabel = rawBuildId?.trim() ? rawBuildId.trim().slice(0, 7) : "local";
 
 export function runtimeModeFromStored(value: unknown): RuntimeMode | undefined {
-  return value === "hosted" || value === "official" || value === "demo" ? value : undefined;
+  return value === "official" || value === "demo" ? value : undefined;
 }
 
 function normalizeUrl(value: string | undefined): string {

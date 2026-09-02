@@ -727,17 +727,6 @@ button:disabled {
   color: #143d2d;
 }
 
-.cloud-fvs-help {
-  display: grid;
-  gap: 0.65rem;
-  width: min(900px, 100%);
-  padding: 0.85rem;
-  border: 1px solid #cbd6dc;
-  border-radius: 8px;
-  background: #f4f8fa;
-  color: #143845;
-}
-
 .setup-guide {
   display: grid;
   gap: 1rem;
@@ -810,30 +799,8 @@ button:disabled {
 }
 
 .local-fvs-help h3,
-.local-fvs-help p,
-.cloud-fvs-help h3,
-.cloud-fvs-help p {
+.local-fvs-help p {
   margin: 0;
-}
-
-.service-url-field {
-  display: grid;
-  gap: 0.3rem;
-  width: 100%;
-  color: #30473a;
-  font-weight: 700;
-}
-
-.service-url-field input {
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #cbd6dc;
-  border-radius: 6px;
-  padding: 0.55rem 0.65rem;
-  background: #ffffff;
-  color: #1b2b31;
-  font: inherit;
-  font-weight: 500;
 }
 
 .connector-url {

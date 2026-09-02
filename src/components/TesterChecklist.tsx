@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, ClipboardList, FileJson, RefreshCw, Terminal } from "lucide-react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
-import { hasHostedFvsApi, hostedFvsApiUrl, type RuntimeMode } from "../config/runtime";
+import { type RuntimeMode } from "../config/runtime";
 
 interface BridgeHealth {
   ok: boolean;
@@ -38,8 +38,8 @@ export function TesterChecklist({
   const [bridgeError, setBridgeError] = useState("");
   const requestedVariant = `FVS${request.fvs.variant}`.toLowerCase();
   const variantBuilt = bridgeHealth?.variants.some((variant) => variant.toLowerCase() === requestedVariant) ?? false;
-  const runtimeHealthUrl = runtimeMode === "hosted" && hasHostedFvsApi ? `${hostedFvsApiUrl}/health` : "http://127.0.0.1:8787/health";
-  const runtimeName = runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS connector";
+  const runtimeHealthUrl = "http://127.0.0.1:8787/health";
+  const runtimeName = "Local FVS connector";
 
   useEffect(() => {
     void checkBridge();
@@ -54,7 +54,7 @@ export function TesterChecklist({
       setBridgeHealth(health);
     } catch {
       setBridgeHealth(undefined);
-      setBridgeError(runtimeMode === "hosted" ? "Hosted FVS API is not reachable." : "Local bridge is offline.");
+      setBridgeError("Local bridge is offline.");
     }
     setBridgeChecking(false);
   }
@@ -71,7 +71,7 @@ export function TesterChecklist({
         </span>
       </div>
 
-      <p className="quiet">Use this page as the handoff script for a tester. Prefer Local FVS when the connector is available; use Carbine Cloud FVS as the fallback.</p>
+      <p className="quiet">Use this page as the handoff script for a tester. CARBINE should run through the user's Local FVS connector.</p>
 
       <div className="checklist-grid">
         <article className="checklist-card">
@@ -101,17 +101,13 @@ export function TesterChecklist({
               {bridgeHealth?.ok ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
               {runtimeName}: {bridgeHealth?.ok ? "reachable" : bridgeError || bridgeHealth?.error || "not checked yet"}
             </li>
-            <li className={runtimeMode === "hosted" && hasHostedFvsApi ? "pass" : "warn"}>
-              {runtimeMode === "hosted" && hasHostedFvsApi ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-              Carbine Cloud FVS: {hasHostedFvsApi ? hostedFvsApiUrl : "not configured in this build"}
-            </li>
             <li className={variantBuilt ? "pass" : "warn"}>
               {variantBuilt ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
               Requested variant {request.fvs.variant}: {variantBuilt ? "built" : "not found in bridge health"}
             </li>
             <li className={isRealFvs ? "pass" : "warn"}>
               {isRealFvs ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
-              Official FVS result confirmed: {isRealFvs ? "yes" : "run Local FVS or Carbine Cloud mode"}
+              Official FVS result confirmed: {isRealFvs ? "yes" : "run Local FVS mode"}
             </li>
           </ul>
           <div className="button-row">
@@ -130,7 +126,7 @@ export function TesterChecklist({
             <li>Load an inventory CSV and confirm the record count looks right.</li>
             <li>Keep a No treatment baseline.</li>
             <li>Add one or more treatment scenarios using the dropdown controls.</li>
-            <li>On Run, choose Local FVS when the connector is running, or Carbine Cloud FVS as the fallback.</li>
+            <li>On Run, choose Local FVS when the connector is running.</li>
             <li>Run scenarios, review Results, then open Report.</li>
             <li>Open Advanced and export diagnostics.</li>
           </ol>

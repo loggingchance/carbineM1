@@ -1,4 +1,4 @@
-import { Cloud, Download, Laptop, Play, RefreshCw } from "lucide-react";
+import { Download, Laptop, Play, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CarbineScenarioResults } from "../domain/carbonResults";
 import type { CarbineRunRequest } from "../domain/fvsRunRequest";
@@ -6,7 +6,7 @@ import type { FvsAdapter, FvsRuntimeInfo } from "../fvs/FvsAdapter";
 import { writeInventoryPreview, writeKeywordPreview } from "../fvs/keywordWriter";
 import { inventoryColumnHelp, summarizeInventory } from "../domain/inventorySchema";
 import type { ValidationMessage } from "../domain/validation";
-import { hasHostedFvsApi, hostedFvsApiUrl, localFvsConnectorUrl, type RuntimeMode } from "../config/runtime";
+import { localFvsConnectorUrl, type RuntimeMode } from "../config/runtime";
 
 const windowsFvsDownloadUrl = "https://www.fs.usda.gov/fvs/software/complete.php";
 const windowsConnectorDownloadUrl = "https://github.com/loggingchance/carbineM1/releases/latest/download/carbine-fvs-connector-windows-x64.zip";
@@ -100,29 +100,15 @@ export function RunPanel({
     <section className="panel run-panel">
       <p className="eyebrow">Run</p>
       <h2>Run the scenario set</h2>
-      <p className="quiet">Use FVS on this computer when available. Carbine Cloud FVS remains available as a convenience fallback.</p>
+      <p className="quiet">Use the local CARBINE connector so FVS runs on the user's own computer.</p>
       <div className="segmented" aria-label="Runtime mode">
         <button type="button" className={runtimeMode === "official" ? "active" : ""} onClick={() => onRuntimeModeChange("official")}>
           <Laptop size={16} /> Local FVS
-        </button>
-        <button
-          type="button"
-          className={runtimeMode === "hosted" ? "active" : ""}
-          onClick={() => onRuntimeModeChange("hosted")}
-          disabled={!hasHostedFvsApi}
-          title={hasHostedFvsApi ? "Use the hosted Carbine FVS API" : "Carbine Cloud FVS is not configured for this build"}
-        >
-          <Cloud size={16} /> Carbine Cloud
         </button>
         <button type="button" className={runtimeMode === "demo" ? "active" : ""} onClick={() => onRuntimeModeChange("demo")}>
           Demo
         </button>
       </div>
-      {runtimeMode === "hosted" && !hasHostedFvsApi && (
-        <p className="note">
-          Carbine Cloud FVS is not configured for this build.
-        </p>
-      )}
       {runtimeMode === "official" && (
         <div className="local-fvs-help">
           <div>
@@ -141,18 +127,6 @@ export function RunPanel({
             </a>
           </div>
           <p className="connector-url">Connector address: <code>{localFvsConnectorUrl}</code></p>
-        </div>
-      )}
-      {runtimeMode === "hosted" && (
-        <div className="cloud-fvs-help">
-          <div>
-            <h3>Carbine Cloud FVS</h3>
-            <p>Carbine Cloud is an optional fallback for deployments that explicitly configure a hosted CARBINE FVS API.</p>
-          </div>
-          <label className="service-url-field">
-            <span>Cloud compatibility API</span>
-            <input value={hostedFvsApiUrl || "Not configured"} readOnly />
-          </label>
         </div>
       )}
       <div className="runtime-check" aria-live="polite">
