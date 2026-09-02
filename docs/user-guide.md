@@ -2,7 +2,7 @@
 
 ## Start CARBINE
 
-For outside testers, open the CARBINE web address. The preferred runtime is `Local FVS`, which uses the user's own USDA Forest Service FVS installation through the Carbine FVS Connector. `Carbine Cloud FVS` remains available as the fallback when local FVS is not installed or the connector is not running.
+For outside testers, open the CARBINE web address. The runtime is `Local FVS`, which uses the user's own USDA Forest Service FVS installation through the Carbine FVS Connector.
 
 ## Local official-FVS testing
 
@@ -53,7 +53,7 @@ Open `http://127.0.0.1:5174/`.
 3. Choose the FVS variant. Current outside-testing work is verified on the NE path.
 4. Add a no-treatment baseline and treatment scenarios.
 5. Use FVS cycle years from the treatment-year dropdown.
-6. Run the scenario set with `Local FVS` selected when the connector is available. Use `Carbine Cloud FVS` as the fallback.
+6. Run the scenario set with `Local FVS` selected.
 7. Review Results:
    - Scenario summary cards show final carbon and removed carbon.
    - Treatment effects compare each scenario against no treatment by year.

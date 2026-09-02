@@ -1,23 +1,21 @@
 # CARBINE Web Deployment
 
-CARBINE's outside-tester build should encourage Local FVS first and keep Carbine Cloud FVS available as a fallback.
+CARBINE's outside-tester build should use Local FVS through the CARBINE FVS Connector.
 
 ## Required Architecture
 
 1. GitHub Pages, Netlify, or another static host serves the CARBINE browser app.
-2. A local Carbine FVS Connector runs official FVS executables on the user's computer when available.
-3. A hosted CARBINE FVS API runs official FVS executables on a server as Carbine Cloud FVS.
-4. The browser app is built with `VITE_CARBINE_FVS_API_URL` pointing at that API so the fallback is available.
+2. A local Carbine FVS Connector runs official FVS executables on the user's computer.
 
-Static hosting by itself is not enough because native FVS executables cannot run inside GitHub Pages. The browser needs either the user's localhost connector or the hosted API.
+Static hosting by itself is not enough because native FVS executables cannot run inside GitHub Pages. The browser needs the user's localhost connector.
 
 For the first Google Cloud deployment path, use a Windows Server VM on Google Compute Engine. See `docs/google-cloud-windows-api.md`.
 
-MicroFVS is a promising future implementation for Carbine Cloud FVS, but it does not currently match CARBINE's `/health` and `/run` contract directly. See `docs/microfvs-cloud-spike.md` before swapping the hosted backend.
+The earlier public hosted FVS API path has been disabled in the app to avoid owner-paid public compute.
 
 ## API Contract
 
-The hosted API should match the local bridge contract:
+The local connector contract is:
 
 ```text
 GET /health
@@ -39,34 +37,23 @@ POST /run
 
 It returns the FVS exit status plus raw output files, including `input.out` and `input.sum` when available.
 
-## Hosted API Process
+## Local Connector Process
 
-The current API process is:
+The connector process is:
 
 ```text
 npm run fvs:api
 ```
 
-For a hosted server, configure it with environment variables instead of asking testers to run anything:
+For local connector development, configure it with:
 
 ```text
-CARBINE_FVS_HOST=0.0.0.0
+CARBINE_FVS_HOST=127.0.0.1
 CARBINE_FVS_PORT=8787
 FVS_BIN_DIR=/absolute/path/to/ForestVegetationSimulator-main/bin
-CARBINE_ALLOWED_ORIGINS=https://your-carbine-web-address
 ```
 
 On Windows hosting, `FVS_BIN_DIR` can point at the folder containing `fvsne.exe`, `fvsls.exe`, and the other compiled official variant executables.
-
-## Frontend Configuration
-
-Set the repository variable:
-
-```text
-VITE_CARBINE_FVS_API_URL=https://your-carbine-fvs-api.example.com
-```
-
-Then deploy the Pages workflow. The Run screen will default to Local FVS and offer Carbine Cloud FVS as the fallback.
 
 ## Local Bridge Status
 

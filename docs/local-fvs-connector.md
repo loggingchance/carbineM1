@@ -1,6 +1,6 @@
 # Local FVS Connector
 
-CARBINE can run FVS on the user's own computer through a small localhost connector. This is the preferred low-cost path for regular users. The hosted Carbine Cloud FVS API remains a fallback for users who cannot install or start FVS locally.
+CARBINE can run FVS on the user's own computer through a small localhost connector. This is the preferred low-cost path for regular users.
 
 ## User Workflow
 

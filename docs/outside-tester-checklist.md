@@ -1,12 +1,12 @@
 # CARBINE Outside Tester Checklist
 
-This checklist is for official-FVS testing of CARBINE. Prefer the user's local FVS installation through the Carbine FVS Connector. Use Carbine Cloud FVS when local FVS is unavailable.
+This checklist is for official-FVS testing of CARBINE. Use the user's local FVS installation through the Carbine FVS Connector.
 
 ## Start CARBINE
 
 Open the CARBINE web address supplied by the project owner.
 
-Outside testers can run on their own FVS installation by starting the Carbine FVS Connector. If they cannot install FVS or start the connector, switch the Run screen to Carbine Cloud FVS.
+Outside testers can run on their own FVS installation by starting the Carbine FVS Connector.
 
 ## Local FVS check
 
@@ -65,10 +65,10 @@ http://127.0.0.1:5174/
 5. Add one or more treatment scenarios.
 6. Use the treatment-year dropdown. Do not type off-cycle years.
 7. Review the actual FVS control preview under each scenario.
-8. Go to Tester and confirm Local FVS is reachable. If it is not, switch to Carbine Cloud FVS and confirm the hosted API is reachable.
+8. Go to Tester and confirm Local FVS is reachable.
 9. Confirm the requested variant is available.
 10. Go to Run.
-11. Confirm the runtime is `Local FVS` when the connector is available, or `Carbine Cloud FVS` as the fallback.
+11. Confirm the runtime is `Local FVS`.
 12. Run scenarios.
 13. Confirm Results says `Real FVS runtime`.
 14. Review Scenario Summary and Treatment effects vs no treatment.
@@ -87,7 +87,7 @@ Send these files or notes after each test:
 
 ## Current known limits
 
-- The outside-test build can request any compiled official FVS regional variant reported by the local connector or hosted API. Review species codes, FVS forest/location code, and site index for the selected variant.
+- The outside-test build can request any compiled official FVS regional variant reported by the local connector. Review species codes, FVS forest/location code, and site index for the selected variant.
 - Carbon is parsed from official FVS `FMIN` / `CARBREPT` stand carbon output.
 - Soil carbon is excluded.
 - Treatments currently use simple `THINDBH` controls: treatment year, DBH min/max, and percent basal area removal.

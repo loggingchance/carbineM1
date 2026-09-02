@@ -25,7 +25,7 @@ import type { CarbineScenarioResults } from "./domain/carbonResults";
 import { FvsMockAdapter } from "./fvs/FvsMockAdapter";
 import { parseInventoryCsv } from "./domain/validation";
 import { FvsOfficialSourceAdapter } from "./fvs/FvsOfficialSourceAdapter";
-import { carbineBuildLabel, hostedFvsApiUrl, localFvsConnectorUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
+import { carbineBuildLabel, localFvsConnectorUrl, runtimeModeFromStored, type RuntimeMode } from "./config/runtime";
 import { getVariantByCode } from "./fvs/variantCatalog";
 
 const steps: WorkflowStep[] = ["Inventory", "Scenario", "Run", "Results", "Report", "Advanced", "Setup FVS", "About"];
@@ -91,18 +91,7 @@ export function App() {
       ),
     []
   );
-  const hostedAdapter = useMemo(
-    () =>
-      new FvsOfficialSourceAdapter(
-        hostedFvsApiUrl,
-        "Hosted official FVS API",
-        "Hosted official FVS API",
-        "Hosted FVS API not configured",
-        "This deployment needs VITE_CARBINE_FVS_API_URL set to the hosted CARBINE FVS API."
-      ),
-    []
-  );
-  const adapter = runtimeMode === "hosted" ? hostedAdapter : runtimeMode === "official" ? officialAdapter : demoAdapter;
+  const adapter = runtimeMode === "official" ? officialAdapter : demoAdapter;
   const request = useMemo<CarbineRunRequest>(
     () => ({
       project: {
@@ -183,7 +172,7 @@ export function App() {
 
   return (
     <div className="app">
-      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : runtimeMode === "hosted" ? "Carbine Cloud FVS" : "Local FVS"} />
+      <Banner runtimeLabel={results?.isRealFvs ? "Real FVS runtime" : "Local FVS"} />
       <WorkflowShell steps={steps} activeStep={activeStep} onChange={setActiveStep} />
       <section className="connector-announcement" aria-label="FVS connection setup">
         <div className="connector-copy">

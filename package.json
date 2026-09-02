@@ -11,7 +11,6 @@
     "doctor": "node scripts/carbine-doctor.mjs",
     "fvs:bridge": "node scripts/local-fvs-bridge.mjs",
     "fvs:api": "node scripts/local-fvs-bridge.mjs",
-    "hosted:health": "node scripts/check-hosted-fvs-api.mjs",
     "microfvs:probe": "node scripts/check-microfvs-api.mjs",
     "connector:package:win": "node scripts/package-windows-connector.mjs",
     "fvs:source:status": "node scripts/fvs-source-status.mjs",
